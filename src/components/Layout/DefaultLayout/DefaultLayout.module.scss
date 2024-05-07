@@ -1,0 +1,14 @@
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+.container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex-grow: 1; /* Content sẽ mở rộng để lấp đầy không gian còn lại trong container */
+}
