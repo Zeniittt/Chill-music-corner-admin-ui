@@ -4,7 +4,7 @@ import styles from './User.module.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { Button, Table, Tag, Space, Modal, Form, Input } from 'antd';
+import { Button, Table, Tag, Space, Modal, Form, Input, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import userServices from '~/services/userServices';
 
@@ -88,13 +88,15 @@ const data = [
 
 function User() {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [data, setData] = useState(null);
+    const [user, setUser] = useState(null);
+    const [addUser, setAddUser] = useState({
+        name: '',
+        status: '',
+    });
 
     const handleOpen = () => {
         setIsModalOpen(true);
     };
-
-    const handleOk = () => {};
 
     const handleCancle = () => {
         setIsModalOpen(false);
@@ -104,8 +106,7 @@ function User() {
         async function fetchUser() {
             try {
                 const listUser = await userServices.getAllUser();
-                console.log(listUser);
-                setData(listUser);
+                setUser(listUser);
             } catch (error) {
                 console.error('Error fetching user data:', error);
             }
@@ -113,116 +114,112 @@ function User() {
         fetchUser();
     }, []);
 
-    // return (
-    //     <div>
-    //         <div className={cx('title')}>
-    //             <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faUser} />} User</h1>
-    //         </div>
-    //         <div className={cx('container-add')}>
-    //             <Button className={cx('button-add')} onClick={handleOpen}>
-    //                 <PlusOutlined />
-    //             </Button>
-    //             <h5 className={cx('title-add')}>Add User</h5>
-    //         </div>
-    //         <div>
-    //             <Table dataSource={data} pagination={{ pageSize: 5 }}>
-    //                 <ColumnGroup>
-    //                     <Column title="First Name" dataIndex="firstName" key="firstName" />
-    //                     <Column title="Last Name" dataIndex="lastName" key="lastName" />
-    //                 </ColumnGroup>
-    //                 <Column title="Age" dataIndex="age" key="age" />
-    //                 <Column title="Address" dataIndex="address" key="address" />
-    //                 <Column
-    //                     title="Tags"
-    //                     dataIndex="tags"
-    //                     key="tags"
-    //                     render={(tags) => (
-    //                         <>
-    //                             {tags.map((tag) => (
-    //                                 <Tag color="blue" key={tag}>
-    //                                     {tag}
-    //                                 </Tag>
-    //                             ))}
-    //                         </>
-    //                     )}
-    //                 />
-    //                 <Column
-    //                     title="Action"
-    //                     key="action"
-    //                     render={(_, record) => (
-    //                         <Space size="middle">
-    //                             <a href="/">Invite {record.lastName}</a>
-    //                             <a href="/">Delete</a>
-    //                         </Space>
-    //                     )}
-    //                 />
-    //             </Table>
-    //         </div>
-    //         <Modal title="Add User" open={isModalOpen} onOk={handleOk} onCancel={handleCancle} footer={null}>
-    //             <Form
-    //                 name="basic"
-    //                 labelCol={{
-    //                     span: 8,
-    //                 }}
-    //                 wrapperCol={{
-    //                     span: 16,
-    //                 }}
-    //                 initialValues={{
-    //                     remember: true,
-    //                 }}
-    //                 autoComplete="off"
-    //             >
-    //                 <Form.Item
-    //                     label="Username"
-    //                     name="username"
-    //                     rules={[
-    //                         {
-    //                             required: true,
-    //                             message: 'Please input your username!',
-    //                         },
-    //                     ]}
-    //                 >
-    //                     <Input />
-    //                 </Form.Item>
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setAddUser({
+            ...addUser,
+            [name]: value,
+        });
+    };
 
-    //                 <Form.Item
-    //                     label="Status"
-    //                     name="status"
-    //                     rules={[
-    //                         {
-    //                             required: true,
-    //                             message: 'Please input your status!',
-    //                         },
-    //                     ]}
-    //                 >
-    //                     <Input />
-    //                 </Form.Item>
-    //                 <Form.Item
-    //                     wrapperCol={{
-    //                         offset: 8,
-    //                         span: 16,
-    //                     }}
-    //                 >
-    //                     <Button type="primary" htmlType="submit">
-    //                         Add
-    //                     </Button>
-    //                 </Form.Item>
-    //             </Form>
-    //         </Modal>
-    //     </div>
-    // );
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await userServices.addUser(addUser);
+            message.success('User added successfully');
+            handleCancle();
+            const listUser = await userServices.getAllUser();
+            setUser(listUser);
+            // Xử lý phản hồi từ API, ví dụ: cập nhật state hoặc hiển thị thông báo thành công
+        } catch (error) {
+            console.error('Error creating user:', error);
+            // Xử lý lỗi, ví dụ: hiển thị thông báo lỗi cho người dùng
+        }
+    };
 
     return (
         <div>
-            {data ? (
-                <ul>
-                    {data.map((user) => (
-                        <li key={user.id}>{user.name}</li>
-                    ))}
-                </ul>
-            ) : (
-                <p>No user data available.</p>
-            )}
+            <div className={cx('title')}>
+                <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faUser} />} User</h1>
+            </div>
+            <div className={cx('container-add')}>
+                <Button className={cx('button-add')} onClick={handleOpen}>
+                    <PlusOutlined />
+                </Button>
+                <h5 className={cx('title-add')}>Add User</h5>
+            </div>
+            <div>
+                <Table dataSource={user} pagination={{ pageSize: 5 }}>
+                    <Column title="First Name" dataIndex="name" key="name" align="center" />
+                    <Column title="Last Name" dataIndex="status" key="status" align="center" />
+
+                    <Column
+                        title="Action"
+                        key="action"
+                        render={(_, record) => (
+                            <Space size="middle">
+                                <a className={cx('edit')} href="/">
+                                    Edit
+                                </a>
+                                <a className={cx('delete')} href="/">
+                                    Delete
+                                </a>
+                            </Space>
+                        )}
+                    />
+                </Table>
+            </div>
+            <Modal title="Add User" open={isModalOpen} onCancel={handleCancle} footer={null}>
+                <Form
+                    name="basic"
+                    labelCol={{
+                        span: 8,
+                    }}
+                    wrapperCol={{
+                        span: 16,
+                    }}
+                    initialValues={{
+                        remember: true,
+                    }}
+                    autoComplete="off"
+                >
+                    <Form.Item
+                        label="Name"
+                        name="name"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input your name!',
+                            },
+                        ]}
+                    >
+                        <Input type="text" name="name" value={addUser.name} onChange={handleChange} />
+                    </Form.Item>
+
+                    <Form.Item
+                        label="Status"
+                        name="status"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input your status!',
+                            },
+                        ]}
+                    >
+                        <Input type="text" name="status" value={addUser.status} onChange={handleChange} />
+                    </Form.Item>
+                    <Form.Item
+                        wrapperCol={{
+                            offset: 8,
+                            span: 16,
+                        }}
+                    >
+                        <Button onClick={handleSubmit} type="primary" htmlType="submit">
+                            Add
+                        </Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     );
 }
