@@ -1,0 +1,26 @@
+.menu-item {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 16px;
+    border-radius: 16px;
+
+    &.active {
+        background: linear-gradient(to right, #fa7d44, #fb6263, #eb5454);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    &:hover {
+        background-color: hsla(0, 1%, 51%, 0.23);
+    }
+}
+
+.icon {
+    margin-left: 8px;
+}
+
+.title {
+    margin-left: 8px;
+}
