@@ -4,87 +4,13 @@ import styles from './User.module.scss';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
-import { Button, Table, Tag, Space, Modal, Form, Input, message } from 'antd';
+import { Button, Table, Space, Modal, Form, Input, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import userServices from '~/services/userServices';
 
 const cx = classNames.bind(styles);
 
-const { Column, ColumnGroup } = Table;
-const data = [
-    {
-        key: '1',
-        firstName: 'John',
-        lastName: 'Brown',
-        age: 32,
-        address: 'New York No. 1 Lake Park',
-        tags: ['nice', 'developer'],
-    },
-    {
-        key: '2',
-        firstName: 'Jim',
-        lastName: 'Green',
-        age: 42,
-        address: 'London No. 1 Lake Park',
-        tags: ['loser'],
-    },
-    {
-        key: '3',
-        firstName: 'Joe',
-        lastName: 'Black',
-        age: 32,
-        address: 'Sydney No. 1 Lake Park',
-        tags: ['cool', 'teacher'],
-    },
-    {
-        key: '4',
-        firstName: 'John',
-        lastName: 'Brown',
-        age: 32,
-        address: 'New York No. 1 Lake Park',
-        tags: ['nice', 'developer'],
-    },
-    {
-        key: '5',
-        firstName: 'Jim',
-        lastName: 'Green',
-        age: 42,
-        address: 'London No. 1 Lake Park',
-        tags: ['loser'],
-    },
-    {
-        key: '6',
-        firstName: 'Joe',
-        lastName: 'Black',
-        age: 32,
-        address: 'Sydney No. 1 Lake Park',
-        tags: ['cool', 'teacher'],
-    },
-    {
-        key: '7',
-        firstName: 'John',
-        lastName: 'Brown',
-        age: 32,
-        address: 'New York No. 1 Lake Park',
-        tags: ['nice', 'developer'],
-    },
-    {
-        key: '8',
-        firstName: 'Jim',
-        lastName: 'Green',
-        age: 42,
-        address: 'London No. 1 Lake Park',
-        tags: ['loser'],
-    },
-    {
-        key: '9',
-        firstName: 'Joe',
-        lastName: 'Black',
-        age: 32,
-        address: 'Sydney No. 1 Lake Park',
-        tags: ['cool', 'teacher'],
-    },
-];
+const { Column } = Table;
 
 function User() {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -125,7 +51,7 @@ function User() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await userServices.addUser(addUser);
+            await userServices.addUser(addUser);
             message.success('User added successfully');
             handleCancle();
             const listUser = await userServices.getAllUser();
@@ -149,9 +75,24 @@ function User() {
                 <h5 className={cx('title-add')}>Add User</h5>
             </div>
             <div>
-                <Table dataSource={user} pagination={{ pageSize: 5 }}>
-                    <Column title="First Name" dataIndex="name" key="name" align="center" />
-                    <Column title="Last Name" dataIndex="status" key="status" align="center" />
+                <Table dataSource={user} rowKey="userID" pagination={{ pageSize: 5 }}>
+                    <Column title="User ID" dataIndex="userID" key="userID" align="center" width={120} />
+                    <Column
+                        title="Avatar"
+                        dataIndex="imageURL"
+                        key="imageURL"
+                        align="center"
+                        render={(imageURL) => (
+                            <img
+                                src={imageURL}
+                                alt="avatar"
+                                style={{ width: '50px', height: '50px', borderRadius: '50%' }}
+                            />
+                        )}
+                    />
+                    <Column title="Username" dataIndex="username" key="username" align="center" />
+                    <Column title="Email" dataIndex="email" key="email" align="center" />
+                    <Column title="SignIn Method" dataIndex="signInMethod" key="signInMethod" align="center" />
 
                     <Column
                         title="Action"
