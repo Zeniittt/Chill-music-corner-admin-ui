@@ -15,6 +15,7 @@ const { Column } = Table;
 function User() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [user, setUser] = useState(null);
+
     const [addUser, setAddUser] = useState({
         name: '',
         status: '',

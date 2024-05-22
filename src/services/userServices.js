@@ -5,7 +5,13 @@ const apiUrl = process.env.REACT_APP_API_URL + '/users';
 const userServices = {
     getAllUser: async () => {
         try {
-            const respone = await axios.get(apiUrl);
+            console.log(apiUrl);
+            const token = localStorage.getItem('token');
+            const respone = await axios.get(apiUrl, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             const listUser = respone.data;
             Object.keys(listUser).forEach((key) => {
                 var dataUser = listUser[key];
