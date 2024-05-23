@@ -3,7 +3,16 @@ import config from '~/config';
 import Menu, { MenuItem } from './Menu';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faGear, faMusic } from '@fortawesome/free-solid-svg-icons';
+import {
+    faUser,
+    faGear,
+    faMusic,
+    faAd,
+    faMicrophone,
+    faHeadphones,
+    faCompactDisc,
+    faBell,
+} from '@fortawesome/free-solid-svg-icons';
 import classNames from 'classnames/bind';
 import styles from './Sidebar.module.scss';
 import logo from '~/assets/imgs/logothk.png';
@@ -24,11 +33,16 @@ function Sidebar() {
             <aside className={cx('wrapper')}>
                 <Menu>
                     <MenuItem title="User" to={config.routes.user} icon={<FontAwesomeIcon icon={faUser} />} />
+                    <MenuItem title="Song" to={config.routes.song} icon={<FontAwesomeIcon icon={faMusic} />} />
+                    <MenuItem title="Artist" to={config.routes.artist} icon={<FontAwesomeIcon icon={faMicrophone} />} />
+                    <MenuItem title="Genre" to={config.routes.genre} icon={<FontAwesomeIcon icon={faHeadphones} />} />
+                    <MenuItem title="Album" to={config.routes.album} icon={<FontAwesomeIcon icon={faCompactDisc} />} />
                     <MenuItem
-                        title="Marketing"
-                        to={config.routes.marketing}
-                        icon={<FontAwesomeIcon icon={faMusic} />}
+                        title="Notification"
+                        to={config.routes.notification}
+                        icon={<FontAwesomeIcon icon={faBell} />}
                     />
+                    <MenuItem title="Marketing" to={config.routes.marketing} icon={<FontAwesomeIcon icon={faAd} />} />
                     <MenuItem title="Log-out" to={config.routes.logout} icon={<FontAwesomeIcon icon={faGear} />} />
                 </Menu>
             </aside>
