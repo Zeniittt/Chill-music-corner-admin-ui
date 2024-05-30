@@ -1,0 +1,38 @@
+.title {
+    margin-top: 16px;
+    margin-left: 32px;
+}
+
+.text-title {
+    word-spacing: 3px;
+}
+
+.container-add {
+    display: inline-block;
+    margin: 32px 32px;
+}
+
+.button-add {
+    height: 120px;
+    width: 120px;
+    border-radius: 8px;
+    font-size: 40px;
+}
+
+.title-add {
+    color: rgb(1, 143, 55);
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.edit {
+    color: rgb(214, 197, 9);
+    font-weight: 700;
+}
+
+.delete {
+    color: rgb(196, 6, 6);
+    font-weight: 700;
+}

@@ -7,7 +7,7 @@ const routes = {
     genre: '/genre',
     album: '/album',
     notification: '/notification',
-    marketing: '/marketing',
+    banner: '/banner',
     logout: '/',
 };
 

@@ -42,7 +42,7 @@ function Sidebar() {
                         to={config.routes.notification}
                         icon={<FontAwesomeIcon icon={faBell} />}
                     />
-                    <MenuItem title="Marketing" to={config.routes.marketing} icon={<FontAwesomeIcon icon={faAd} />} />
+                    <MenuItem title="Banner" to={config.routes.banner} icon={<FontAwesomeIcon icon={faAd} />} />
                     <MenuItem title="Log-out" to={config.routes.logout} icon={<FontAwesomeIcon icon={faGear} />} />
                 </Menu>
             </aside>

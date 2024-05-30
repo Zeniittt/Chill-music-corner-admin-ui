@@ -8,7 +8,7 @@ import Artist from '~/pages/Artist';
 import Genre from '~/pages/Genre';
 import Album from '~/pages/Album';
 import Notification from '~/pages/Notification';
-import Marketing from '~/pages/Marketing';
+import Banner from '~/pages/Banner';
 
 const publicRoutes = [{ path: config.routes.main, component: Main }];
 
@@ -20,7 +20,7 @@ const privateRoutes = [
     { path: config.routes.genre, component: Genre },
     { path: config.routes.album, component: Album },
     { path: config.routes.notification, component: Notification },
-    { path: config.routes.marketing, component: Marketing },
+    { path: config.routes.banner, component: Banner },
     { path: config.routes.logout, component: Main },
 ];
 
