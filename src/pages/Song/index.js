@@ -130,6 +130,7 @@ function Song() {
                     <Column
                         title="Action"
                         key="action"
+                        align="center"
                         render={(_, record) => (
                             <Space size="middle">
                                 <a className={cx('edit')} href="/">

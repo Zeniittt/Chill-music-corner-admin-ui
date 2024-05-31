@@ -1,8 +1,47 @@
 .title {
-    margin-top: 8px;
-    margin-left: 16px;
+    margin-top: 16px;
+    margin-left: 32px;
 }
 
 .text-title {
     word-spacing: 3px;
+}
+
+.container-add {
+    display: inline-block;
+    margin: 32px 32px;
+}
+
+.button-add {
+    height: 90px;
+    width: 90px;
+    border-radius: 8px;
+    font-size: 40px;
+}
+
+.title-add {
+    color: rgb(1, 143, 55);
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    font-weight: 700;
+}
+
+.none-list-style {
+    list-style: none;
+}
+
+.edit {
+    color: rgb(214, 197, 9);
+    font-weight: 700;
+}
+
+.delete {
+    color: rgb(196, 6, 6);
+    font-weight: 700;
+}
+
+.underline {
+    color: rgb(0, 159, 217);
+    text-decoration: underline;
 }
