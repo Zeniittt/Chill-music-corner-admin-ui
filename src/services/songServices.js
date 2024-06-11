@@ -19,6 +19,16 @@ const songServices = {
         }
     },
 
+    getSongById: async (songId) => {
+        try {
+            const response = await axios.get(`${apiUrl}/songID?songID=${songId}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching song:', error);
+            throw error;
+        }
+    },
+
     addSong: async (songData) => {
         try {
             const response = await axios.post(apiUrl, songData, {
@@ -38,6 +48,16 @@ const songServices = {
             return response.data;
         } catch (error) {
             console.error(error);
+        }
+    },
+
+    updateSong: async (songId, updatedData) => {
+        try {
+            const response = await axios.patch(`${apiUrl}/${songId}`, updatedData);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating song:', error);
+            throw error;
         }
     },
 };
