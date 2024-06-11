@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './Song.module.scss';
 
@@ -16,6 +17,7 @@ function Song() {
     const fileInputRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [song, setSong] = useState(null);
+    const [selectedSongId, setSelectedSongId] = useState(null);
     //const [user, setUser] = useState(null);
 
     const [addSong, setAddSong] = useState({
@@ -26,6 +28,16 @@ function Song() {
         views: '',
         songFile: null,
     });
+
+    const navigate = useNavigate();
+
+    const handleReload = () => {
+        // Full page reload
+        window.location.reload();
+
+        // Or using React Router
+        navigate(window.location.pathname);
+    };
 
     const handleOpen = () => {
         setIsModalOpen(true);
@@ -73,10 +85,35 @@ function Song() {
             formData.append('views', addSong.views);
             formData.append('songFile', addSong.songFile); // Thêm tệp nhạc vào FormData
 
-            await songServices.addSong(formData); // Gửi dữ liệu dưới dạng FormData
+            try {
+                await songServices.addSong(formData); // Gửi dữ liệu dưới dạng FormData
+            } catch (error) {
+                console.error('Error creating user:', error);
+            }
 
             message.success('Song added successfully');
-            handleCancle();
+            handleReload();
+        } catch (error) {
+            console.error('Error creating user:', error);
+        }
+    };
+
+    const handleSelectSong = (record) => {
+        // Extract song ID from the record object
+        const songId = record.songID;
+
+        // Update state with the selected song ID
+        setSelectedSongId(songId);
+    };
+
+    const handleDeleteSong = async (songId) => {
+        try {
+            await songServices.deleteSong(songId);
+            message.success('Song added successfully');
+            setTimeout(() => {
+                console.log('Delayed message after 2 seconds');
+            }, 1000);
+            handleReload();
         } catch (error) {
             console.error('Error creating user:', error);
         }
@@ -94,7 +131,7 @@ function Song() {
                 <h5 className={cx('title-add')}>Add Song</h5>
             </div>
             <div>
-                <Table dataSource={song} rowKey="userID" pagination={{ pageSize: 5 }}>
+                <Table dataSource={song} rowKey="userID" pagination={{ pageSize: 5 }} onRow={handleSelectSong}>
                     <Column title="Song ID" dataIndex="songID" key="userID" align="center" width={70} />
                     <Column
                         title="Thumbnail"
@@ -133,12 +170,15 @@ function Song() {
                         align="center"
                         render={(_, record) => (
                             <Space size="middle">
-                                <a className={cx('edit')} href="/">
-                                    Edit
-                                </a>
-                                <a className={cx('delete')} href="/">
+                                <button className={cx('edit')}>Edit</button>
+                                <button
+                                    className={cx('delete')}
+                                    disabled={!selectedSongId}
+                                    onClick={() => handleDeleteSong(record.songID)}
+                                >
+                                    {/* Bind `handleDeleteSong` to the button click and pass the song ID */}
                                     Delete
-                                </a>
+                                </button>
                             </Space>
                         )}
                     />

@@ -78,7 +78,7 @@ function Artist() {
     };
 
     return (
-        <div>
+        <div className={cx('wrapper')}>
             <div className={cx('title')}>
                 <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faMicrophone} />} Artist</h1>
             </div>
@@ -89,7 +89,7 @@ function Artist() {
                 <h5 className={cx('title-add')}>Add Artist</h5>
             </div>
             <div>
-                <Table dataSource={artist} rowKey="artistID" pagination={{ pageSize: 5 }}>
+                <Table dataSource={artist} rowKey="artistID" pagination={{ pageSize: 3 }}>
                     <Column title="Artist ID" dataIndex="artistID" key="artistID" align="center" width={70} />
                     <Column
                         title="Avatar"
@@ -106,7 +106,19 @@ function Artist() {
                     />
                     <Column title="Name" dataIndex="name" key="name" align="center" width={150} />
                     <Column title="Description" dataIndex="description" key="description" align="center" width={400} />
-                    <Column title="List Song" dataIndex="listSong" key="listSong" align="center" />
+                    <Column
+                        title="List Song"
+                        dataIndex="listSong"
+                        key="listSong"
+                        align="center"
+                        render={(listSong) => (
+                            <ul className={cx('none-list-style')}>
+                                {listSong.map((song, index) => (
+                                    <li key={index}>{song}</li>
+                                ))}
+                            </ul>
+                        )}
+                    />
                     <Column title="List Album" dataIndex="listAlbum" key="listAlbum" align="center" />
                     <Column
                         title="Action"

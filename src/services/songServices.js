@@ -31,6 +31,15 @@ const songServices = {
             console.error(error);
         }
     },
+
+    deleteSong: async (songId) => {
+        try {
+            const response = await axios.delete(`${apiUrl}/${songId}`);
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
 };
 
 export default songServices;

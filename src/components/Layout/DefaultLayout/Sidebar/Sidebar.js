@@ -4,6 +4,7 @@ import Menu, { MenuItem } from './Menu';
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
+    faMagnifyingGlass,
     faUser,
     faGear,
     faMusic,
@@ -32,6 +33,11 @@ function Sidebar() {
             </a>
             <aside className={cx('wrapper')}>
                 <Menu>
+                    <MenuItem
+                        title="Search"
+                        to={config.routes.search}
+                        icon={<FontAwesomeIcon icon={faMagnifyingGlass} />}
+                    />
                     <MenuItem title="User" to={config.routes.user} icon={<FontAwesomeIcon icon={faUser} />} />
                     <MenuItem title="Song" to={config.routes.song} icon={<FontAwesomeIcon icon={faMusic} />} />
                     <MenuItem title="Artist" to={config.routes.artist} icon={<FontAwesomeIcon icon={faMicrophone} />} />

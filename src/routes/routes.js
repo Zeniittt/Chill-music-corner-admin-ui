@@ -2,6 +2,7 @@ import config from '~/config';
 
 import Main from '~/pages/Main';
 import Home from '~/pages/Home';
+import Search from '~/pages/Search';
 import User from '~/pages/User';
 import Song from '~/pages/Song';
 import Artist from '~/pages/Artist';
@@ -14,6 +15,7 @@ const publicRoutes = [{ path: config.routes.main, component: Main }];
 
 const privateRoutes = [
     { path: config.routes.home, component: Home },
+    { path: config.routes.search, component: Search },
     { path: config.routes.user, component: User },
     { path: config.routes.song, component: Song },
     { path: config.routes.artist, component: Artist },

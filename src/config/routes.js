@@ -1,6 +1,7 @@
 const routes = {
     main: '/',
     home: '/home',
+    search: '/seach',
     user: '/user',
     song: '/song',
     artist: '/artist',
