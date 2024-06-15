@@ -19,6 +19,16 @@ const artistServices = {
         }
     },
 
+    getArtistById: async (artistID) => {
+        try {
+            const response = await axios.get(`${apiUrl}/artistID?artistID=${artistID}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching song:', error);
+            throw error;
+        }
+    },
+
     addArtist: async (artistData) => {
         try {
             const response = await axios.post(apiUrl, artistData, {
@@ -26,6 +36,45 @@ const artistServices = {
                     'Content-Type': 'multipart/form-data', // Thiết lập header 'Content-Type' là 'multipart/form-data'
                 },
             });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
+    updateArtist: async (artistId, updatedData) => {
+        try {
+            const response = await axios.patch(`${apiUrl}/${artistId}`, updatedData);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating artist:', error);
+            throw error;
+        }
+    },
+
+    deleteArtist: async (artistId) => {
+        try {
+            const response = await axios.delete(`${apiUrl}/${artistId}`);
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
+    getListSongByArtistID: async (artistId) => {
+        console.log(artistId);
+        try {
+            const response = await axios.get(`${apiUrl}/listSong?artistID=${artistId}`);
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
+    getListAlbumgByArtistID: async (artistId) => {
+        console.log(artistId);
+        try {
+            const response = await axios.get(`${apiUrl}/listAlbum?artistID=${artistId}`);
             return response.data;
         } catch (error) {
             console.error(error);

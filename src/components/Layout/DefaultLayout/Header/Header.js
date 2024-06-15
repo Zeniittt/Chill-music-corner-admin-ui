@@ -6,7 +6,7 @@ const cx = classNames.bind(styles);
 function Header() {
     return (
         <header className={cx('wrapper')}>
-            <h1>Chào mừng bạn đến với THK Ngoolxn ♥</h1>
+            <h1>Chào mừng bạn đến với THK Music ♥</h1>
         </header>
     );
 }

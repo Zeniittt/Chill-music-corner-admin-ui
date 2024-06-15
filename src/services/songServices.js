@@ -42,15 +42,6 @@ const songServices = {
         }
     },
 
-    deleteSong: async (songId) => {
-        try {
-            const response = await axios.delete(`${apiUrl}/${songId}`);
-            return response.data;
-        } catch (error) {
-            console.error(error);
-        }
-    },
-
     updateSong: async (songId, updatedData) => {
         try {
             const response = await axios.patch(`${apiUrl}/${songId}`, updatedData);
@@ -58,6 +49,15 @@ const songServices = {
         } catch (error) {
             console.error('Error updating song:', error);
             throw error;
+        }
+    },
+
+    deleteSong: async (songId) => {
+        try {
+            const response = await axios.delete(`${apiUrl}/${songId}`);
+            return response.data;
+        } catch (error) {
+            console.error(error);
         }
     },
 };

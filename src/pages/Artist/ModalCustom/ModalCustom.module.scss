@@ -27,23 +27,6 @@
     font-weight: 700;
 }
 
-.list-song-btn,
-.list-album-btn {
-    white-space: nowrap;
-    background-color: rgb(3, 193, 218);
-    padding: 5px 5px;
-    border-radius: 8px;
-    color: #fff;
-}
-
-.list-song-btn:hover,
-.list-album-btn:hover {
-    background-color: #fff;
-    color: rgb(3, 193, 218);
-    cursor: pointer;
-    font-weight: bold;
-}
-
 .edit {
     background-color: rgb(214, 197, 9);
     padding: 5px 5px;
@@ -53,26 +36,12 @@
     //font-weight: 700;
 }
 
-.edit:hover {
-    background-color: #fff;
-    color: rgb(214, 197, 9);
-    cursor: pointer;
-    font-weight: bold;
-}
-
 .delete {
     background-color: rgb(196, 6, 6);
     padding: 5px 5px;
     border-radius: 8px;
     color: #fff;
     border-color: #fff;
-    font-weight: bold;
-}
-
-.delete:hover {
-    background-color: #fff;
-    color: rgb(196, 6, 6);
-    cursor: pointer;
 }
 
 .underline {

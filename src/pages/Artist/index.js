@@ -1,8 +1,12 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './Artist.module.scss';
+import ModalCustom from '~/pages/Artist/ModalCustom';
+import ModalListSong from '~/pages/Artist/ModalListSong';
+import ModalListAlbum from '~/pages/Artist/ModalListAlbum';
 
-import { Button, Table, Space, Modal, Form, Input, message } from 'antd';
+import { Button, Table, Space, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
@@ -13,86 +17,125 @@ const cx = classNames.bind(styles);
 const { Column } = Table;
 
 function Artist() {
-    const fileInputRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [artist, setArtist] = useState(null);
+    const [modalType, setModalType] = useState('');
+    const [artists, setArtists] = useState([]);
+    const [selectedArtist, setSelectedArtist] = useState(null);
 
-    const [addArtist, setAddArtist] = useState({
-        name: '',
-        description: '',
-        imageURL: null,
-    });
+    const [isModalOpenListSong, setIsModalOpenListSong] = useState(false);
+    const [isModalOpenListAlbum, setIsModalOpenListAlbum] = useState(false);
+    const [selectedArtistID, setSelectedArtistID] = useState(null);
 
-    const handleOpen = () => {
+    const navigate = useNavigate();
+
+    const handleReload = () => {
+        // Full page reload
+        window.location.reload();
+
+        // Or using React Router
+        navigate(window.location.pathname);
+    };
+
+    const handleOpen = async (type, artistId = null) => {
+        setModalType(type);
+        if (type === 'update' && artistId) {
+            try {
+                const artistData = await artistServices.getArtistById(artistId);
+                setSelectedArtist(artistData);
+            } catch (error) {
+                console.error('Error fetching artist:', error);
+            }
+        } else {
+            setSelectedArtist(null);
+        }
         setIsModalOpen(true);
     };
 
-    const handleCancle = () => {
+    const handleCancel = () => {
+        setModalType('');
         setIsModalOpen(false);
     };
 
     useEffect(() => {
-        async function fetchArtist() {
+        async function fetchAritst() {
             try {
                 const listArtist = await artistServices.getAllArtist();
-                setArtist(listArtist);
+                setArtists(listArtist);
             } catch (error) {
-                console.error('Error fetching user data:', error);
+                console.error('Error fetching artists:', error);
             }
         }
-        fetchArtist();
+        fetchAritst();
     }, []);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setAddArtist({
-            ...addArtist,
-            [name]: value,
-        });
-    };
-
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setAddArtist({ ...addArtist, imageURL: file });
-        }
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleDeleteArtist = async (artistId) => {
         try {
-            console.log(addArtist.name);
-
-            const formData = new FormData();
-            formData.append('name', addArtist.name);
-            formData.append('description', addArtist.description);
-            formData.append('imageURL', addArtist.imageURL); // Thêm tệp nhạc vào FormData
-
-            await artistServices.addArtist(formData); // Gửi dữ liệu dưới dạng FormData
-
-            message.success('Artist added successfully');
-            handleCancle();
+            await artistServices.deleteArtist(artistId);
+            message.success('Artist deleted successfully');
+            handleReload();
         } catch (error) {
-            console.error('Error creating artist:', error);
+            console.error('Error deleting artist:', error);
         }
+    };
+
+    const handleSubmit = async (values, file) => {
+        try {
+            if (modalType === 'add') {
+                const formData = new FormData();
+                for (const key in values) {
+                    formData.append(key, values[key]);
+                }
+                formData.append('imageURL', file);
+                await artistServices.addArtist(formData);
+                message.success('Artist added successfully');
+            } else if (modalType === 'update' && selectedArtist) {
+                await artistServices.updateArtist(selectedArtist.artistID, values);
+                message.success('Artist updated successfully');
+            }
+            handleReload();
+        } catch (error) {
+            console.error('Error processing request:', error);
+        }
+    };
+
+    //------------------------------------------------------------------------------------------
+    //handle render list song
+    const handleOpenModalListSong = async (artistId) => {
+        setIsModalOpenListSong(true);
+        setSelectedArtistID(artistId);
+    };
+
+    const handleCloseModalListSong = () => {
+        setIsModalOpenListSong(false);
+    };
+
+    //------------------------------------------------------------------------------------------
+    //handle render list album
+    const handleOpenModalListAlbum = async (artistId) => {
+        setIsModalOpenListAlbum(true);
+        setSelectedArtistID(artistId);
+    };
+
+    const handleCloseModalListAlbum = () => {
+        setIsModalOpenListAlbum(false);
     };
 
     return (
-        <div className={cx('wrapper')}>
+        <div>
             <div className={cx('title')}>
                 <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faMicrophone} />} Artist</h1>
             </div>
             <div className={cx('container-add')}>
-                <Button className={cx('button-add')} onClick={handleOpen}>
+                <Button className={cx('button-add')} onClick={() => handleOpen('add')}>
                     <PlusOutlined />
                 </Button>
                 <h5 className={cx('title-add')}>Add Artist</h5>
             </div>
             <div>
-                <Table dataSource={artist} rowKey="artistID" pagination={{ pageSize: 3 }}>
+                <Table dataSource={artists} rowKey="artistID" pagination={{ pageSize: 3 }}>
                     <Column title="Artist ID" dataIndex="artistID" key="artistID" align="center" width={70} />
                     <Column
-                        title="Avatar"
+                        title="Thumbnail"
                         dataIndex="imageURL"
                         key="imageURL"
                         align="center"
@@ -104,110 +147,76 @@ function Artist() {
                             />
                         )}
                     />
-                    <Column title="Name" dataIndex="name" key="name" align="center" width={150} />
-                    <Column title="Description" dataIndex="description" key="description" align="center" width={400} />
+                    <Column title="Name" dataIndex="name" key="name" align="center" />
+                    <Column title="Description" dataIndex="description" key="description" align="center" />
                     <Column
                         title="List Song"
-                        dataIndex="listSong"
                         key="listSong"
                         align="center"
-                        render={(listSong) => (
-                            <ul className={cx('none-list-style')}>
-                                {listSong.map((song, index) => (
-                                    <li key={index}>{song}</li>
-                                ))}
-                            </ul>
+                        render={(_, record) => (
+                            <button
+                                className={cx('list-song-btn')}
+                                onClick={() => handleOpenModalListSong(record.artistID)}
+                            >
+                                Click here to view detail
+                            </button>
                         )}
                     />
-                    <Column title="List Album" dataIndex="listAlbum" key="listAlbum" align="center" />
+                    <Column
+                        title="List Album"
+                        key="listAlbum"
+                        align="center"
+                        render={(_, record) => (
+                            <button
+                                className={cx('list-album-btn')}
+                                onClick={() => handleOpenModalListAlbum(record.artistID)}
+                            >
+                                Click here to view detail
+                            </button>
+                        )}
+                    />
                     <Column
                         title="Action"
                         key="action"
                         align="center"
                         render={(_, record) => (
                             <Space size="middle">
-                                <a className={cx('edit')} href="/">
+                                <button className={cx('edit')} onClick={() => handleOpen('update', record.artistID)}>
                                     Edit
-                                </a>
-                                <a className={cx('delete')} href="/">
+                                </button>
+                                <button className={cx('delete')} onClick={() => handleDeleteArtist(record.artistID)}>
                                     Delete
-                                </a>
+                                </button>
                             </Space>
                         )}
                     />
                 </Table>
             </div>
-            <Modal title="Add Artist" open={isModalOpen} onCancel={handleCancle} footer={null}>
-                <Form
-                    name="basic"
-                    labelCol={{
-                        span: 8,
-                    }}
-                    wrapperCol={{
-                        span: 16,
-                    }}
-                    initialValues={{
-                        remember: true,
-                    }}
-                    autoComplete="off"
-                >
-                    <Form.Item
-                        label="Name"
-                        name="name"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input artist name!',
-                            },
-                        ]}
-                    >
-                        <Input type="text" name="name" value={addArtist.name} onChange={handleChange} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Description"
-                        name="description"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input artist description!',
-                            },
-                        ]}
-                    >
-                        <Input type="text" name="description" value={addArtist.description} onChange={handleChange} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Avatar File"
-                        name="imageURL"
-                        rules={[
-                            {
-                                required: true,
-                            },
-                        ]}
-                    >
-                        <Input
-                            type="file"
-                            ref={fileInputRef}
-                            name="imageURL"
-                            value={addArtist.imageURL}
-                            onChange={handleFileChange}
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        className={cx('button-add-container')}
-                        wrapperCol={{
-                            offset: 8,
-                            span: 16,
-                        }}
-                    >
-                        <Button onClick={handleSubmit} type="primary" htmlType="submit">
-                            Add
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Modal>
+            {isModalOpen && (
+                <ModalCustom
+                    type={modalType}
+                    title={modalType === 'add' ? 'Add Artist' : 'Update Artist'}
+                    isModalOpen={isModalOpen}
+                    handleCancel={handleCancel}
+                    btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
+                    handleSubmit={handleSubmit}
+                    artistData={selectedArtist}
+                />
+            )}
+            {isModalOpenListSong && (
+                <ModalListSong
+                    isModalOpenListSong={isModalOpenListSong}
+                    onCancel={handleCloseModalListSong}
+                    artistID={selectedArtistID}
+                />
+            )}
+            {isModalOpenListAlbum && (
+                <ModalListAlbum
+                    isModalOpenListAlbum={isModalOpenListAlbum}
+                    onCancel={handleCloseModalListAlbum}
+                    artistID={selectedArtistID}
+                />
+            )}
         </div>
     );
 }
