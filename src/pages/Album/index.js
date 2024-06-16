@@ -1,8 +1,11 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './Album.module.scss';
+import ModalCustom from '~/pages/Album/ModalCustom';
+import ModalListSong from '~/pages/Artist/ModalListSong';
 
-import { Button, Table, Space, Modal, Form, Input, message } from 'antd';
+import { Button, Table, Space, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCompactDisc } from '@fortawesome/free-solid-svg-icons';
@@ -13,69 +16,95 @@ const cx = classNames.bind(styles);
 const { Column } = Table;
 
 function Artist() {
-    const fileInputRef = useRef(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [album, setAlbum] = useState(null);
+    const [modalType, setModalType] = useState('');
+    const [albums, setAlbums] = useState([]);
+    const [selectedAlbum, setSelectedAlbum] = useState(null);
 
-    const [addAlbum, setaddAlbum] = useState({
-        name: '',
-        artist: '',
-        description: '',
-        imageURL: null,
-    });
+    const [isModalOpenListSong, setIsModalOpenListSong] = useState(false);
+    const [selectedAlbumID, setSelectedAlbumID] = useState(null);
 
-    const handleOpen = () => {
+    const navigate = useNavigate();
+
+    const handleReload = () => {
+        // Full page reload
+        window.location.reload();
+
+        // Or using React Router
+        navigate(window.location.pathname);
+    };
+
+    const handleOpen = async (type, albumID = null) => {
+        setModalType(type);
+        if (type === 'update' && albumID) {
+            try {
+                const albumData = await albumServices.getAlbumById(albumID);
+                setSelectedAlbum(albumData);
+            } catch (error) {
+                console.error('Error fetching artist:', error);
+            }
+        } else {
+            setSelectedAlbum(null);
+        }
         setIsModalOpen(true);
     };
 
-    const handleCancle = () => {
+    const handleCancel = () => {
+        setModalType('');
         setIsModalOpen(false);
     };
 
     useEffect(() => {
-        async function fetchArtist() {
+        async function fetchAlbum() {
             try {
                 const listAlbum = await albumServices.getAllAlbum();
-                setAlbum(listAlbum);
+                setAlbums(listAlbum);
             } catch (error) {
-                console.error('Error fetching user data:', error);
+                console.error('Error fetching albums:', error);
             }
         }
-        fetchArtist();
+        fetchAlbum();
     }, []);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setaddAlbum({
-            ...addAlbum,
-            [name]: value,
-        });
-    };
-
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setaddAlbum({ ...addAlbum, imageURL: file });
-        }
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleDeleteArtist = async (artistId) => {
         try {
-            console.log(addAlbum.name);
-
-            const formData = new FormData();
-            formData.append('name', addAlbum.name);
-            formData.append('artist', addAlbum.artist);
-            formData.append('imageURL', addAlbum.imageURL); // Thêm tệp nhạc vào FormData
-
-            await albumServices.addAlbum(formData); // Gửi dữ liệu dưới dạng FormData
-
-            message.success('Album added successfully');
-            handleCancle();
+            await albumServices.deleteAlbum(artistId);
+            message.success('Album deleted successfully');
+            handleReload();
         } catch (error) {
-            console.error('Error creating artist:', error);
+            console.error('Error deleting album:', error);
         }
+    };
+
+    const handleSubmit = async (values, file) => {
+        try {
+            if (modalType === 'add') {
+                const formData = new FormData();
+                for (const key in values) {
+                    formData.append(key, values[key]);
+                }
+                formData.append('imageURL', file);
+                await albumServices.addAlbum(formData);
+                message.success('Album added successfully');
+            } else if (modalType === 'update' && selectedAlbum) {
+                await albumServices.updateAlbum(selectedAlbum.albumID, values);
+                message.success('Album updated successfully');
+            }
+            handleReload();
+        } catch (error) {
+            console.error('Error processing request:', error);
+        }
+    };
+
+    //------------------------------------------------------------------------------------------
+    //handle render list song
+    const handleOpenModalListSong = async (albumID) => {
+        setIsModalOpenListSong(true);
+        setSelectedAlbumID(albumID);
+    };
+
+    const handleCloseModalListSong = () => {
+        setIsModalOpenListSong(false);
     };
 
     return (
@@ -84,16 +113,16 @@ function Artist() {
                 <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faCompactDisc} />} Album</h1>
             </div>
             <div className={cx('container-add')}>
-                <Button className={cx('button-add')} onClick={handleOpen}>
+                <Button className={cx('button-add')} onClick={() => handleOpen('add')}>
                     <PlusOutlined />
                 </Button>
                 <h5 className={cx('title-add')}>Add Album</h5>
             </div>
             <div>
-                <Table dataSource={album} rowKey="albumID" pagination={{ pageSize: 5 }}>
+                <Table dataSource={albums} rowKey="albumID" pagination={{ pageSize: 5 }}>
                     <Column title="Album ID" dataIndex="albumID" key="albumID" align="center" width={70} />
                     <Column
-                        title="Thumbnaik"
+                        title="Thumbnail"
                         dataIndex="imageURL"
                         key="imageURL"
                         align="center"
@@ -105,19 +134,19 @@ function Artist() {
                             />
                         )}
                     />
-                    <Column title="Name" dataIndex="name" key="name" align="center" width={150} />
-                    <Column title="Artist" dataIndex="artist" key="artist" align="center" width={400} />
+                    <Column title="Name" dataIndex="name" key="name" align="center" />
+                    <Column title="Artist" dataIndex="artist" key="artist" align="center" />
                     <Column
                         title="List Song"
-                        dataIndex="listSong"
                         key="listSong"
                         align="center"
-                        render={(listSong) => (
-                            <ul className={cx('none-list-style')}>
-                                {listSong.map((song, index) => (
-                                    <li key={index}>{song}</li>
-                                ))}
-                            </ul>
+                        render={(_, record) => (
+                            <button
+                                className={cx('list-song-btn')}
+                                onClick={() => handleOpenModalListSong(record.albumID)}
+                            >
+                                Click here to view detail
+                            </button>
                         )}
                     />
                     <Column
@@ -126,88 +155,35 @@ function Artist() {
                         align="center"
                         render={(_, record) => (
                             <Space size="middle">
-                                <a className={cx('edit')} href="/">
+                                <button className={cx('edit')} onClick={() => handleOpen('update', record.albumID)}>
                                     Edit
-                                </a>
-                                <a className={cx('delete')} href="/">
+                                </button>
+                                <button className={cx('delete')} onClick={() => handleDeleteArtist(record.albumID)}>
                                     Delete
-                                </a>
+                                </button>
                             </Space>
                         )}
                     />
                 </Table>
             </div>
-            <Modal title="Add Album" open={isModalOpen} onCancel={handleCancle} footer={null}>
-                <Form
-                    name="basic"
-                    labelCol={{
-                        span: 8,
-                    }}
-                    wrapperCol={{
-                        span: 16,
-                    }}
-                    initialValues={{
-                        remember: true,
-                    }}
-                    autoComplete="off"
-                >
-                    <Form.Item
-                        label="Name"
-                        name="name"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input album name!',
-                            },
-                        ]}
-                    >
-                        <Input type="text" name="name" value={addAlbum.name} onChange={handleChange} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Artist"
-                        name="artist"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input album artist!',
-                            },
-                        ]}
-                    >
-                        <Input type="text" name="artist" value={addAlbum.artist} onChange={handleChange} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Thumbnail File"
-                        name="imageURL"
-                        rules={[
-                            {
-                                required: true,
-                            },
-                        ]}
-                    >
-                        <Input
-                            type="file"
-                            ref={fileInputRef}
-                            name="imageURL"
-                            value={addAlbum.imageURL}
-                            onChange={handleFileChange}
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        className={cx('button-add-container')}
-                        wrapperCol={{
-                            offset: 8,
-                            span: 16,
-                        }}
-                    >
-                        <Button onClick={handleSubmit} type="primary" htmlType="submit">
-                            Add
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Modal>
+            {isModalOpen && (
+                <ModalCustom
+                    type={modalType}
+                    title={modalType === 'add' ? 'Add Album' : 'Update Album'}
+                    isModalOpen={isModalOpen}
+                    handleCancel={handleCancel}
+                    btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
+                    handleSubmit={handleSubmit}
+                    albumData={selectedAlbum}
+                />
+            )}
+            {isModalOpenListSong && (
+                <ModalListSong
+                    isModalOpenListSong={isModalOpenListSong}
+                    onCancel={handleCloseModalListSong}
+                    albumID={selectedAlbumID}
+                />
+            )}
         </div>
     );
 }

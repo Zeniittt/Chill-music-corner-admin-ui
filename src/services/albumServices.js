@@ -19,6 +19,16 @@ const albumServices = {
         }
     },
 
+    getAlbumById: async (albumID) => {
+        try {
+            const response = await axios.get(`${apiUrl}/albumID?albumID=${albumID}`);
+            return response.data;
+        } catch (error) {
+            console.error('Error fetching song:', error);
+            throw error;
+        }
+    },
+
     addAlbum: async (artistData) => {
         try {
             const response = await axios.post(apiUrl, artistData, {
@@ -26,6 +36,35 @@ const albumServices = {
                     'Content-Type': 'multipart/form-data', // Thiết lập header 'Content-Type' là 'multipart/form-data'
                 },
             });
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
+    updateAlbum: async (albumID, updatedData) => {
+        try {
+            const response = await axios.patch(`${apiUrl}/${albumID}`, updatedData);
+            return response.data;
+        } catch (error) {
+            console.error('Error updating album:', error);
+            throw error;
+        }
+    },
+
+    deleteAlbum: async (albumID) => {
+        try {
+            const response = await axios.delete(`${apiUrl}/${albumID}`);
+            return response.data;
+        } catch (error) {
+            console.error(error);
+        }
+    },
+
+    getListSongByAlbumID: async (albumID) => {
+        console.log(albumID);
+        try {
+            const response = await axios.get(`${apiUrl}/listSong?albumID=${albumID}`);
             return response.data;
         } catch (error) {
             console.error(error);
