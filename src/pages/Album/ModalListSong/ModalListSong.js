@@ -1,26 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Table } from 'antd';
-import artistServices from '~/services/artistServices';
+import albumServices from '~/services/albumServices';
 
 const { Column } = Table;
 
-function ModalListSong({ isModalOpenListSong, onCancel, artistID }) {
+function ModalListSong({ isModalOpenListSong, onCancel, albumID }) {
+    console.log(albumID);
     const [listSong, setListSong] = useState([]);
 
     useEffect(() => {
         async function fetchSong() {
             try {
-                const listSong = await artistServices.getListSongByArtistID(artistID);
+                const listSong = await albumServices.getListSongByAlbumID(albumID);
                 console.log(listSong);
                 setListSong(listSong);
             } catch (error) {
-                console.error('Error fetching artists:', error);
+                console.error('Error fetching albums:', error);
             }
         }
-        if (isModalOpenListSong && artistID) {
+        if (isModalOpenListSong && albumID) {
             fetchSong();
         }
-    }, [isModalOpenListSong, artistID]);
+    }, [isModalOpenListSong, albumID]);
 
     return (
         <Modal open={isModalOpenListSong} onCancel={onCancel} width={1500} footer={null}>

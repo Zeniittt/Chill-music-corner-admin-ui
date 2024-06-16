@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './Album.module.scss';
 import ModalCustom from '~/pages/Album/ModalCustom';
-import ModalListSong from '~/pages/Artist/ModalListSong';
+import ModalListSong from '~/pages/Album/ModalListSong';
 
 import { Button, Table, Space, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
@@ -15,7 +15,7 @@ const cx = classNames.bind(styles);
 
 const { Column } = Table;
 
-function Artist() {
+function Album() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState('');
     const [albums, setAlbums] = useState([]);
@@ -41,7 +41,7 @@ function Artist() {
                 const albumData = await albumServices.getAlbumById(albumID);
                 setSelectedAlbum(albumData);
             } catch (error) {
-                console.error('Error fetching artist:', error);
+                console.error('Error fetching album:', error);
             }
         } else {
             setSelectedAlbum(null);
@@ -66,9 +66,9 @@ function Artist() {
         fetchAlbum();
     }, []);
 
-    const handleDeleteArtist = async (artistId) => {
+    const handleDeleteAlbum = async (albumID) => {
         try {
-            await albumServices.deleteAlbum(artistId);
+            await albumServices.deleteAlbum(albumID);
             message.success('Album deleted successfully');
             handleReload();
         } catch (error) {
@@ -158,7 +158,7 @@ function Artist() {
                                 <button className={cx('edit')} onClick={() => handleOpen('update', record.albumID)}>
                                     Edit
                                 </button>
-                                <button className={cx('delete')} onClick={() => handleDeleteArtist(record.albumID)}>
+                                <button className={cx('delete')} onClick={() => handleDeleteAlbum(record.albumID)}>
                                     Delete
                                 </button>
                             </Space>
@@ -188,4 +188,4 @@ function Artist() {
     );
 }
 
-export default Artist;
+export default Album;
