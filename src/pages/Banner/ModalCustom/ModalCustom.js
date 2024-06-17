@@ -35,6 +35,36 @@ function ModalCustom({ type, title, isModalOpen, handleCancel, btnSubmit, handle
                 onFinish={onFinish}
                 autoComplete="off"
             >
+                {type === 'update' ? null : (
+                    <Form.Item
+                        label="Title"
+                        name="title"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input banner title!',
+                            },
+                        ]}
+                    >
+                        <Input type="text" name="title" />
+                    </Form.Item>
+                )}
+
+                {type === 'update' ? null : (
+                    <Form.Item
+                        label="Content"
+                        name="body"
+                        rules={[
+                            {
+                                required: true,
+                                message: 'Please input banner content!',
+                            },
+                        ]}
+                    >
+                        <Input.TextArea type="text" name="body" rows={7} />
+                    </Form.Item>
+                )}
+
                 <Form.Item
                     label="Link"
                     name="link"
@@ -45,7 +75,7 @@ function ModalCustom({ type, title, isModalOpen, handleCancel, btnSubmit, handle
                         },
                     ]}
                 >
-                    <Input type="text" name="link" />
+                    <Input.TextArea type="text" name="link" rows={2} />
                 </Form.Item>
 
                 {type === 'update' ? null : (

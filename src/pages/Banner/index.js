@@ -120,6 +120,9 @@ function Banner() {
                             />
                         )}
                     />
+                    <Column title="Title" dataIndex="title" key="title" align="center" />
+                    <Column title="Content" dataIndex="body" key="body" align="center" />
+
                     <Column
                         title="Link"
                         dataIndex="link"
