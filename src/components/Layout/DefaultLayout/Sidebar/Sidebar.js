@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 import config from '~/config';
 
 import Menu, { MenuItem } from './Menu';
@@ -19,6 +20,16 @@ import logo from '~/assets/imgs/logothk.png';
 const cx = classNames.bind(styles);
 
 function Sidebar() {
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        // Thực hiện logic đăng xuất tại đây
+        // Ví dụ: xóa token khỏi localStorage hoặc cookie
+        localStorage.removeItem('token'); // Giả sử bạn lưu token ở localStorage
+        // Chuyển hướng người dùng đến trang đăng nhập
+        navigate('/');
+    };
+
     return (
         <div className={cx('sidebar')}>
             <a href="/home">
@@ -42,7 +53,10 @@ function Sidebar() {
                         icon={<FontAwesomeIcon icon={faBell} />}
                     /> */}
                     <MenuItem title="Banner" to={config.routes.banner} icon={<FontAwesomeIcon icon={faAd} />} />
-                    <MenuItem title="Log-out" to={config.routes.logout} icon={<FontAwesomeIcon icon={faGear} />} />
+
+                    <button className={cx('button')} onClick={handleLogout}>
+                        <MenuItem title="Log-out" to={config.routes.main} icon={<FontAwesomeIcon icon={faGear} />} />
+                    </button>
                 </Menu>
             </aside>
         </div>

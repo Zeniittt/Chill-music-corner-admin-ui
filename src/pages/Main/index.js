@@ -8,7 +8,7 @@ import styles from './Main.module.scss';
 
 const cx = classNames.bind(styles);
 
-function Main() {
+function Main({ onLoginSuccess }) {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const nagative = useNavigate();
@@ -28,6 +28,10 @@ function Main() {
             console.log(token);
             localStorage.setItem('token', token); // Lưu token vào localStorage
             nagative('/home'); // Chuyển hướng đến trang chính
+            if (onLoginSuccess) {
+                // Check if prop exists
+                onLoginSuccess(); // Call the prop function
+            }
         } catch (err) {
             console.log(err);
         }
