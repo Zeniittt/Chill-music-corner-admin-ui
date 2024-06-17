@@ -1,103 +1,114 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames/bind';
 import styles from './Banner.module.scss';
+import ModalCustom from '~/pages/Banner/ModalCustom';
 
-import { Button, Table, Space, Modal, Form, Input, message } from 'antd';
+import { Button, Table, Space, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAd } from '@fortawesome/free-solid-svg-icons';
-import songServices from '~/services/songServices';
+import bannerServices from '~/services/bannerServices';
 
 const cx = classNames.bind(styles);
 
 const { Column } = Table;
 
-function Marketing() {
-    const fileInputRef = useRef(null);
+function Banner() {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [song, setSong] = useState(null);
-    //const [user, setUser] = useState(null);
+    const [modalType, setModalType] = useState('');
+    const [banners, setBanners] = useState([]);
+    const [selectedBanner, setSelectedBanner] = useState(null);
 
-    const [addSong, setAddSong] = useState({
-        name: '',
-        artist: '',
-        genre: '',
-        album: '',
-        views: '',
-        songFile: null,
-    });
+    const navigate = useNavigate();
 
-    const handleOpen = () => {
+    const handleReload = () => {
+        // Full page reload
+        window.location.reload();
+
+        // Or using React Router
+        navigate(window.location.pathname);
+    };
+
+    const handleOpen = async (type, bannerID = null) => {
+        setModalType(type);
+        if (type === 'update' && bannerID) {
+            try {
+                const bannerData = await bannerServices.getBannerById(bannerID);
+                setSelectedBanner(bannerData);
+            } catch (error) {
+                console.error('Error fetching banner:', error);
+            }
+        } else {
+            setSelectedBanner(null);
+        }
         setIsModalOpen(true);
     };
 
-    const handleCancle = () => {
+    const handleCancel = () => {
+        setModalType('');
         setIsModalOpen(false);
     };
 
     useEffect(() => {
-        async function fetchSong() {
+        async function fetchBanners() {
             try {
-                const listSong = await songServices.getAllSong();
-                setSong(listSong);
+                const listBanner = await bannerServices.getAllBanner();
+                setBanners(listBanner);
             } catch (error) {
-                console.error('Error fetching user data:', error);
+                console.error('Error fetching banners:', error);
             }
         }
-        fetchSong();
+        fetchBanners();
     }, []);
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setAddSong({
-            ...addSong,
-            [name]: value,
-        });
-    };
-
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setAddSong({ ...addSong, songFile: file });
+    const handleDeleteBanner = async (bannerID) => {
+        try {
+            await bannerServices.deleteBanner(bannerID);
+            message.success('Banner deleted successfully');
+            handleReload();
+        } catch (error) {
+            console.error('Error deleting banner:', error);
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleSubmit = async (values, file) => {
         try {
-            const formData = new FormData();
-            formData.append('name', addSong.name);
-            formData.append('artist', addSong.artist);
-            formData.append('genre', addSong.genre);
-            formData.append('album', addSong.album);
-            formData.append('views', addSong.views);
-            formData.append('songFile', addSong.songFile); // Thêm tệp nhạc vào FormData
-
-            await songServices.addSong(formData); // Gửi dữ liệu dưới dạng FormData
-
-            message.success('Song added successfully');
-            handleCancle();
+            if (modalType === 'add') {
+                const formData = new FormData();
+                for (const key in values) {
+                    formData.append(key, values[key]);
+                }
+                formData.append('imageURL', file);
+                await bannerServices.addBanner(formData);
+                console.log(formData);
+                message.success('Banner added successfully');
+            } else if (modalType === 'update' && selectedBanner) {
+                await bannerServices.updateBanner(selectedBanner.bannerID, values);
+                message.success('Banner updated successfully');
+            }
+            handleReload();
         } catch (error) {
-            console.error('Error creating user:', error);
+            console.error('Error processing request:', error);
         }
     };
 
     return (
         <div>
             <div className={cx('title')}>
-                <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faAd} />} Song</h1>
+                <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faAd} />} Banner</h1>
             </div>
             <div className={cx('container-add')}>
-                <Button className={cx('button-add')} onClick={handleOpen}>
+                <Button className={cx('button-add')} onClick={() => handleOpen('add')}>
                     <PlusOutlined />
                 </Button>
-                <h5 className={cx('title-add')}>Add Song</h5>
+                <h5 className={cx('title-add')}>Add Banner</h5>
             </div>
             <div>
-                <Table dataSource={song} rowKey="userID" pagination={{ pageSize: 5 }}>
-                    <Column title="Song ID" dataIndex="songID" key="userID" align="center" width={70} />
+                <Table dataSource={banners} rowKey="bannerID" pagination={{ pageSize: 5 }}>
+                    <Column title="Banner ID" dataIndex="bannerID" key="bannerID" align="center" width={70} />
                     <Column
-                        title="Thumbnail"
+                        title="Banner Image"
                         dataIndex="imageURL"
                         key="imageURL"
                         align="center"
@@ -109,158 +120,47 @@ function Marketing() {
                             />
                         )}
                     />
-                    <Column title="Name" dataIndex="name" key="name" align="center" />
-                    <Column title="Artist" dataIndex="artist" key="artist" align="center" />
-                    <Column title="Genre" dataIndex="genre" key="genre" align="center" />
-                    <Column title="Album" dataIndex="album" key="album" align="center" />
-                    <Column title="Views" dataIndex="views" key="views" align="center" />
-                    <Column title="Created At" dataIndex="createdAt" key="createdAt" align="center" />
                     <Column
-                        title="Download"
-                        dataIndex="songURL"
-                        key="songURL"
+                        title="Link"
+                        dataIndex="link"
+                        key="link"
                         align="center"
-                        render={(songURL) => (
-                            <a className={cx('underline')} href={songURL}>
-                                Download
+                        render={(link) => (
+                            <a className={cx('underline')} href={link}>
+                                {link}
                             </a>
                         )}
                     />
-
                     <Column
                         title="Action"
                         key="action"
+                        align="center"
                         render={(_, record) => (
                             <Space size="middle">
-                                <a className={cx('edit')} href="/">
+                                <button className={cx('edit')} onClick={() => handleOpen('update', record.bannerID)}>
                                     Edit
-                                </a>
-                                <a className={cx('delete')} href="/">
+                                </button>
+                                <button className={cx('delete')} onClick={() => handleDeleteBanner(record.bannerID)}>
                                     Delete
-                                </a>
+                                </button>
                             </Space>
                         )}
                     />
                 </Table>
             </div>
-            <Modal title="Add Song" open={isModalOpen} onCancel={handleCancle} footer={null}>
-                <Form
-                    name="basic"
-                    labelCol={{
-                        span: 8,
-                    }}
-                    wrapperCol={{
-                        span: 16,
-                    }}
-                    initialValues={{
-                        remember: true,
-                    }}
-                    autoComplete="off"
-                >
-                    <Form.Item
-                        label="Name"
-                        name="name"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input song name!',
-                            },
-                        ]}
-                    >
-                        <Input type="text" name="name" value={addSong.name} onChange={handleChange} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Artist"
-                        name="artist"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input song artist!',
-                            },
-                        ]}
-                    >
-                        <Input type="text" name="artist" value={addSong.artist} onChange={handleChange} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Genre"
-                        name="genre"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input song genre!',
-                            },
-                        ]}
-                    >
-                        <Input type="text" name="genre" value={addSong.genre} onChange={handleChange} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Album"
-                        name="album"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input song album!',
-                            },
-                        ]}
-                    >
-                        <Input type="text" name="album" value={addSong.album} onChange={handleChange} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label="Views"
-                        name="views"
-                        rules={[
-                            {
-                                required: true,
-                                message: 'Please input song views!',
-                            },
-                        ]}
-                    >
-                        <Input type="text" name="views" value={addSong.views} onChange={handleChange} />
-                    </Form.Item>
-                    <Form.Item
-                        label="Song File"
-                        name="songFile"
-                        rules={[
-                            {
-                                required: true,
-                            },
-                        ]}
-                    >
-                        <Input
-                            type="file"
-                            ref={fileInputRef}
-                            name="songFile"
-                            value={addSong.songFile}
-                            onChange={handleFileChange}
-                        />
-                    </Form.Item>
-
-                    {/* <div className={cx('container-add-file')}>
-                        <Button className={cx('button-add-file')} onClick={handleFileButtonClick}>
-                            <FolderAddOutlined />
-                        </Button>
-                        <h5 className={cx('title-add-file')}>Add Song File</h5>
-                    </div> */}
-
-                    <Form.Item
-                        className={cx('button-add-container')}
-                        wrapperCol={{
-                            offset: 8,
-                            span: 16,
-                        }}
-                    >
-                        <Button onClick={handleSubmit} type="primary" htmlType="submit">
-                            Add
-                        </Button>
-                    </Form.Item>
-                </Form>
-            </Modal>
+            {isModalOpen && (
+                <ModalCustom
+                    type={modalType}
+                    title={modalType === 'add' ? 'Add Banner' : 'Update Banner'}
+                    isModalOpen={isModalOpen}
+                    handleCancel={handleCancel}
+                    btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
+                    handleSubmit={handleSubmit}
+                    bannerData={selectedBanner}
+                />
+            )}
         </div>
     );
 }
 
-export default Marketing;
+export default Banner;
