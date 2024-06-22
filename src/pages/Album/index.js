@@ -16,6 +16,7 @@ const cx = classNames.bind(styles);
 const { Column } = Table;
 
 function Album() {
+    const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState('');
     const [albums, setAlbums] = useState([]);
@@ -35,18 +36,25 @@ function Album() {
     };
 
     const handleOpen = async (type, albumID = null) => {
-        setModalType(type);
-        if (type === 'update' && albumID) {
-            try {
-                const albumData = await albumServices.getAlbumById(albumID);
-                setSelectedAlbum(albumData);
-            } catch (error) {
-                console.error('Error fetching album:', error);
-            }
-        } else {
-            setSelectedAlbum(null);
-        }
         setIsModalOpen(true);
+        setLoading(true);
+        setModalType(type);
+        try {
+            if (type === 'update' && albumID) {
+                try {
+                    const albumData = await albumServices.getAlbumById(albumID);
+                    setSelectedAlbum(albumData);
+                } catch (error) {
+                    console.error('Error fetching album:', error);
+                }
+            } else {
+                setSelectedAlbum(null);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCancel = () => {
@@ -56,27 +64,39 @@ function Album() {
 
     useEffect(() => {
         async function fetchAlbum() {
+            setLoading(true);
+            setIsModalOpen(true);
             try {
                 const listAlbum = await albumServices.getAllAlbum();
                 setAlbums(listAlbum);
             } catch (error) {
                 console.error('Error fetching albums:', error);
+            } finally {
+                setLoading(false);
+                setIsModalOpen(false);
             }
         }
         fetchAlbum();
     }, []);
 
     const handleDeleteAlbum = async (albumID) => {
+        setLoading(true);
+        setIsModalOpen(true);
         try {
             await albumServices.deleteAlbum(albumID);
             message.success('Album deleted successfully');
             handleReload();
         } catch (error) {
             console.error('Error deleting album:', error);
+        } finally {
+            setLoading(false);
+            setIsModalOpen(false);
         }
     };
 
     const handleSubmit = async (values, file) => {
+        setLoading(true);
+        setIsModalOpen(true);
         try {
             if (modalType === 'add') {
                 const formData = new FormData();
@@ -93,6 +113,9 @@ function Album() {
             handleReload();
         } catch (error) {
             console.error('Error processing request:', error);
+        } finally {
+            setLoading(false);
+            setIsModalOpen(false);
         }
     };
 
@@ -175,6 +198,7 @@ function Album() {
                     btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
                     handleSubmit={handleSubmit}
                     albumData={selectedAlbum}
+                    loading={loading}
                 />
             )}
             {isModalOpenListSong && (

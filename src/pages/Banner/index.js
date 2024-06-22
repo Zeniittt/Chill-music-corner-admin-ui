@@ -19,6 +19,7 @@ function Banner() {
     const [modalType, setModalType] = useState('');
     const [banners, setBanners] = useState([]);
     const [selectedBanner, setSelectedBanner] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -31,18 +32,25 @@ function Banner() {
     };
 
     const handleOpen = async (type, bannerID = null) => {
-        setModalType(type);
-        if (type === 'update' && bannerID) {
-            try {
-                const bannerData = await bannerServices.getBannerById(bannerID);
-                setSelectedBanner(bannerData);
-            } catch (error) {
-                console.error('Error fetching banner:', error);
-            }
-        } else {
-            setSelectedBanner(null);
-        }
         setIsModalOpen(true);
+        setLoading(true);
+        setModalType(type);
+        try {
+            if (type === 'update' && bannerID) {
+                try {
+                    const bannerData = await bannerServices.getBannerById(bannerID);
+                    setSelectedBanner(bannerData);
+                } catch (error) {
+                    console.error('Error fetching banner:', error);
+                }
+            } else {
+                setSelectedBanner(null);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCancel = () => {
@@ -52,27 +60,39 @@ function Banner() {
 
     useEffect(() => {
         async function fetchBanners() {
+            setLoading(true);
+            setIsModalOpen(true);
             try {
                 const listBanner = await bannerServices.getAllBanner();
                 setBanners(listBanner);
             } catch (error) {
                 console.error('Error fetching banners:', error);
+            } finally {
+                setLoading(false);
+                setIsModalOpen(false);
             }
         }
         fetchBanners();
     }, []);
 
     const handleDeleteBanner = async (bannerID) => {
+        setLoading(true);
+        setIsModalOpen(true);
         try {
             await bannerServices.deleteBanner(bannerID);
             message.success('Banner deleted successfully');
             handleReload();
         } catch (error) {
             console.error('Error deleting banner:', error);
+        } finally {
+            setLoading(false);
+            setIsModalOpen(false);
         }
     };
 
     const handleSubmit = async (values, file) => {
+        setLoading(true);
+        setIsModalOpen(true);
         try {
             if (modalType === 'add') {
                 const formData = new FormData();
@@ -90,6 +110,9 @@ function Banner() {
             handleReload();
         } catch (error) {
             console.error('Error processing request:', error);
+        } finally {
+            setLoading(false);
+            setIsModalOpen(false);
         }
     };
 
@@ -160,6 +183,7 @@ function Banner() {
                     btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
                     handleSubmit={handleSubmit}
                     bannerData={selectedBanner}
+                    loading={loading}
                 />
             )}
         </div>

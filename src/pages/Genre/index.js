@@ -19,6 +19,7 @@ function Genre() {
     const [modalType, setModalType] = useState('');
     const [genres, setGenres] = useState([]);
     const [selectedGenre, setSelectedGenre] = useState(null);
+    const [loading, setLoading] = useState(false);
 
     const navigate = useNavigate();
 
@@ -31,18 +32,25 @@ function Genre() {
     };
 
     const handleOpen = async (type, genreID = null) => {
-        setModalType(type);
-        if (type === 'update' && genreID) {
-            try {
-                const genreData = await genreServices.getGenreById(genreID);
-                setSelectedGenre(genreData);
-            } catch (error) {
-                console.error('Error fetching genre:', error);
-            }
-        } else {
-            setSelectedGenre(null);
-        }
         setIsModalOpen(true);
+        setLoading(true);
+        setModalType(type);
+        try {
+            if (type === 'update' && genreID) {
+                try {
+                    const genreData = await genreServices.getGenreById(genreID);
+                    setSelectedGenre(genreData);
+                } catch (error) {
+                    console.error('Error fetching genre:', error);
+                }
+            } else {
+                setSelectedGenre(null);
+            }
+        } catch (error) {
+            console.log(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCancel = () => {
@@ -52,38 +60,58 @@ function Genre() {
 
     useEffect(() => {
         async function fetchGenres() {
+            setLoading(true);
+            setIsModalOpen(true);
             try {
                 const listGenre = await genreServices.getAllGenre();
                 setGenres(listGenre);
             } catch (error) {
                 console.error('Error fetching genres:', error);
+            } finally {
+                setLoading(false);
+                setIsModalOpen(false);
             }
         }
         fetchGenres();
     }, []);
 
     const handleDeleteGenre = async (genreID) => {
+        setLoading(true);
+        setIsModalOpen(true);
         try {
             await genreServices.deleteGenre(genreID);
             message.success('Genre deleted successfully');
             handleReload();
         } catch (error) {
             console.error('Error deleting genre:', error);
+        } finally {
+            setLoading(false);
+            setIsModalOpen(false);
         }
     };
 
-    const handleSubmit = async (value, file) => {
+    const handleSubmit = async (values, file) => {
+        setLoading(true);
+        setIsModalOpen(true);
         try {
             if (modalType === 'add') {
-                await genreServices.addGenre(value);
+                const formData = new FormData();
+                for (const key in values) {
+                    formData.append(key, values[key]);
+                }
+                formData.append('imageURL', file);
+                await genreServices.addGenre(formData);
                 message.success('Genre added successfully');
             } else if (modalType === 'update' && selectedGenre) {
-                await genreServices.updateGenre(selectedGenre.genreID, value);
+                await genreServices.updateGenre(selectedGenre.genreID, values);
                 message.success('Genre updated successfully');
             }
             handleReload();
         } catch (error) {
             console.error('Error processing request:', error);
+        } finally {
+            setLoading(false);
+            setIsModalOpen(false);
         }
     };
 
@@ -101,7 +129,20 @@ function Genre() {
             <div>
                 <Table dataSource={genres} rowKey="genreID" pagination={{ pageSize: 5 }}>
                     <Column title="Genre ID" dataIndex="genreID" key="genreID" align="center" width={500} />
-                    <Column title="Name" dataIndex="name" key="name" align="center" width={1000} />
+                    <Column
+                        title="Genre Image"
+                        dataIndex="imageURL"
+                        key="imageURL"
+                        align="center"
+                        render={(imageURL) => (
+                            <img
+                                src={imageURL}
+                                alt="avatar"
+                                style={{ width: '50px', height: '50px', borderRadius: '50%' }}
+                            />
+                        )}
+                    />
+                    <Column title="Name" dataIndex="name" key="name" align="center" width={700} />
                     <Column
                         title="Action"
                         key="action"
@@ -128,6 +169,7 @@ function Genre() {
                     btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
                     handleSubmit={handleSubmit}
                     genreData={selectedGenre}
+                    loading={loading}
                 />
             )}
         </div>

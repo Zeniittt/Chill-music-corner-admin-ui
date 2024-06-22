@@ -5,13 +5,7 @@ const apiUrl = process.env.REACT_APP_API_URL + '/genres';
 const genreServices = {
     getAllGenre: async () => {
         try {
-            console.log(apiUrl);
-            const token = localStorage.getItem('token');
-            const respone = await axios.get(apiUrl, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const respone = await axios.get(apiUrl);
             const listGenre = respone.data;
             return listGenre;
         } catch (error) {
