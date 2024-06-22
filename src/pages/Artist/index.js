@@ -17,6 +17,7 @@ const cx = classNames.bind(styles);
 const { Column } = Table;
 
 function Artist() {
+    const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalType, setModalType] = useState('');
     const [artists, setArtists] = useState([]);
@@ -37,18 +38,25 @@ function Artist() {
     };
 
     const handleOpen = async (type, artistId = null) => {
-        setModalType(type);
-        if (type === 'update' && artistId) {
-            try {
-                const artistData = await artistServices.getArtistById(artistId);
-                setSelectedArtist(artistData);
-            } catch (error) {
-                console.error('Error fetching artist:', error);
-            }
-        } else {
-            setSelectedArtist(null);
-        }
         setIsModalOpen(true);
+        setLoading(true);
+        setModalType(type);
+        try {
+            if (type === 'update' && artistId) {
+                try {
+                    const artistData = await artistServices.getArtistById(artistId);
+                    setSelectedArtist(artistData);
+                } catch (error) {
+                    console.error('Error fetching artist:', error);
+                }
+            } else {
+                setSelectedArtist(null);
+            }
+        } catch (error) {
+            console.error('Error deleting song:', error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleCancel = () => {
@@ -58,27 +66,39 @@ function Artist() {
 
     useEffect(() => {
         async function fetchAritst() {
+            setLoading(true);
+            setIsModalOpen(true);
             try {
                 const listArtist = await artistServices.getAllArtist();
                 setArtists(listArtist);
             } catch (error) {
                 console.error('Error fetching artists:', error);
+            } finally {
+                setLoading(false);
+                setIsModalOpen(false);
             }
         }
         fetchAritst();
     }, []);
 
     const handleDeleteArtist = async (artistId) => {
+        setLoading(true);
+        setIsModalOpen(true);
         try {
             await artistServices.deleteArtist(artistId);
             message.success('Artist deleted successfully');
             handleReload();
         } catch (error) {
             console.error('Error deleting artist:', error);
+        } finally {
+            setLoading(false);
+            setIsModalOpen(false);
         }
     };
 
     const handleSubmit = async (values, file) => {
+        setLoading(true);
+        setIsModalOpen(true);
         try {
             if (modalType === 'add') {
                 const formData = new FormData();
@@ -95,6 +115,9 @@ function Artist() {
             handleReload();
         } catch (error) {
             console.error('Error processing request:', error);
+        } finally {
+            setLoading(false);
+            setIsModalOpen(false);
         }
     };
 
@@ -121,102 +144,111 @@ function Artist() {
     };
 
     return (
-        <div>
-            <div className={cx('title')}>
-                <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faMicrophone} />} Artist</h1>
-            </div>
-            <div className={cx('container-add')}>
-                <Button className={cx('button-add')} onClick={() => handleOpen('add')}>
-                    <PlusOutlined />
-                </Button>
-                <h5 className={cx('title-add')}>Add Artist</h5>
-            </div>
+        <div className={cx('wrapper')}>
             <div>
-                <Table dataSource={artists} rowKey="artistID" pagination={{ pageSize: 3 }}>
-                    <Column title="Artist ID" dataIndex="artistID" key="artistID" align="center" width={70} />
-                    <Column
-                        title="Thumbnail"
-                        dataIndex="imageURL"
-                        key="imageURL"
-                        align="center"
-                        render={(imageURL) => (
-                            <img
-                                src={imageURL}
-                                alt="avatar"
-                                style={{ width: '50px', height: '50px', borderRadius: '50%' }}
-                            />
-                        )}
-                    />
-                    <Column title="Name" dataIndex="name" key="name" align="center" />
-                    <Column title="Description" dataIndex="description" key="description" align="center" />
-                    <Column
-                        title="List Song"
-                        key="listSong"
-                        align="center"
-                        render={(_, record) => (
-                            <button
-                                className={cx('list-song-btn')}
-                                onClick={() => handleOpenModalListSong(record.artistID)}
-                            >
-                                Click here to view detail
-                            </button>
-                        )}
-                    />
-                    <Column
-                        title="List Album"
-                        key="listAlbum"
-                        align="center"
-                        render={(_, record) => (
-                            <button
-                                className={cx('list-album-btn')}
-                                onClick={() => handleOpenModalListAlbum(record.artistID)}
-                            >
-                                Click here to view detail
-                            </button>
-                        )}
-                    />
-                    <Column
-                        title="Action"
-                        key="action"
-                        align="center"
-                        render={(_, record) => (
-                            <Space size="middle">
-                                <button className={cx('edit')} onClick={() => handleOpen('update', record.artistID)}>
-                                    Edit
+                <div className={cx('title')}>
+                    <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faMicrophone} />} Artist</h1>
+                </div>
+                <div className={cx('container-add')}>
+                    <Button className={cx('button-add')} onClick={() => handleOpen('add')}>
+                        <PlusOutlined />
+                    </Button>
+                    <h5 className={cx('title-add')}>Add Artist</h5>
+                </div>
+                <div>
+                    <Table dataSource={artists} rowKey="artistID" pagination={{ pageSize: 3 }}>
+                        <Column title="Artist ID" dataIndex="artistID" key="artistID" align="center" width={70} />
+                        <Column
+                            title="Thumbnail"
+                            dataIndex="imageURL"
+                            key="imageURL"
+                            align="center"
+                            render={(imageURL) => (
+                                <img
+                                    src={imageURL}
+                                    alt="avatar"
+                                    style={{ width: '50px', height: '50px', borderRadius: '50%' }}
+                                />
+                            )}
+                        />
+                        <Column title="Name" dataIndex="name" key="name" align="center" />
+                        <Column title="Description" dataIndex="description" key="description" align="center" />
+                        <Column
+                            title="List Song"
+                            key="listSong"
+                            align="center"
+                            render={(_, record) => (
+                                <button
+                                    className={cx('list-song-btn')}
+                                    onClick={() => handleOpenModalListSong(record.artistID)}
+                                >
+                                    Click here to view detail
                                 </button>
-                                <button className={cx('delete')} onClick={() => handleDeleteArtist(record.artistID)}>
-                                    Delete
+                            )}
+                        />
+                        <Column
+                            title="List Album"
+                            key="listAlbum"
+                            align="center"
+                            render={(_, record) => (
+                                <button
+                                    className={cx('list-album-btn')}
+                                    onClick={() => handleOpenModalListAlbum(record.artistID)}
+                                >
+                                    Click here to view detail
                                 </button>
-                            </Space>
-                        )}
+                            )}
+                        />
+                        <Column
+                            title="Action"
+                            key="action"
+                            align="center"
+                            render={(_, record) => (
+                                <Space size="middle">
+                                    <button
+                                        className={cx('edit')}
+                                        onClick={() => handleOpen('update', record.artistID)}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        className={cx('delete')}
+                                        onClick={() => handleDeleteArtist(record.artistID)}
+                                    >
+                                        Delete
+                                    </button>
+                                </Space>
+                            )}
+                        />
+                    </Table>
+                </div>
+                {isModalOpen && (
+                    <ModalCustom
+                        type={modalType}
+                        title={modalType === 'add' ? 'Add Artist' : 'Update Artist'}
+                        isModalOpen={isModalOpen}
+                        handleCancel={handleCancel}
+                        btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
+                        handleSubmit={handleSubmit}
+                        artistData={selectedArtist}
+                        loading={loading}
                     />
-                </Table>
+                )}
+                {isModalOpenListSong && (
+                    <ModalListSong
+                        isModalOpenListSong={isModalOpenListSong}
+                        onCancel={handleCloseModalListSong}
+                        artistID={selectedArtistID}
+                    />
+                )}
+                {isModalOpenListAlbum && (
+                    <ModalListAlbum
+                        isModalOpenListAlbum={isModalOpenListAlbum}
+                        onCancel={handleCloseModalListAlbum}
+                        artistID={selectedArtistID}
+                    />
+                )}
             </div>
-            {isModalOpen && (
-                <ModalCustom
-                    type={modalType}
-                    title={modalType === 'add' ? 'Add Artist' : 'Update Artist'}
-                    isModalOpen={isModalOpen}
-                    handleCancel={handleCancel}
-                    btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
-                    handleSubmit={handleSubmit}
-                    artistData={selectedArtist}
-                />
-            )}
-            {isModalOpenListSong && (
-                <ModalListSong
-                    isModalOpenListSong={isModalOpenListSong}
-                    onCancel={handleCloseModalListSong}
-                    artistID={selectedArtistID}
-                />
-            )}
-            {isModalOpenListAlbum && (
-                <ModalListAlbum
-                    isModalOpenListAlbum={isModalOpenListAlbum}
-                    onCancel={handleCloseModalListAlbum}
-                    artistID={selectedArtistID}
-                />
-            )}
         </div>
     );
 }

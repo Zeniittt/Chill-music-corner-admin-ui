@@ -4,12 +4,11 @@ import classNames from 'classnames/bind';
 import styles from './Song.module.scss';
 import ModalCustom from '~/pages/Song/ModalCustom';
 
-import { Button, Table, Space, message, Modal } from 'antd';
+import { Button, Table, Space, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMusic } from '@fortawesome/free-solid-svg-icons';
 import songServices from '~/services/songServices';
-import Loading from '~/pages/Loading';
 
 const cx = classNames.bind(styles);
 
@@ -118,90 +117,76 @@ function Song() {
 
     return (
         <div className={cx('wrapper')}>
-            {loading ? (
-                <Modal className={cx('loading')} visible={true} closable={false} footer={false}>
-                    <Loading />
-                </Modal>
-            ) : (
-                <div>
-                    <div className={cx('title')}>
-                        <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faMusic} />} Song</h1>
-                    </div>
-                    <div className={cx('container-add')}>
-                        <Button className={cx('button-add')} onClick={() => handleOpen('add')}>
-                            <PlusOutlined />
-                        </Button>
-                        <h5 className={cx('title-add')}>Add Song</h5>
-                    </div>
-                    <div>
-                        <Table dataSource={songs} rowKey="songID" pagination={{ pageSize: 5 }}>
-                            <Column title="Song ID" dataIndex="songID" key="songID" align="center" width={70} />
-                            <Column
-                                title="Thumbnail"
-                                dataIndex="imageURL"
-                                key="imageURL"
-                                align="center"
-                                render={(imageURL) => (
-                                    <img
-                                        src={imageURL}
-                                        alt="avatar"
-                                        style={{ width: '50px', height: '50px', borderRadius: '50%' }}
-                                    />
-                                )}
+            <div className={cx('title')}>
+                <h1 className={cx('text-title')}> {<FontAwesomeIcon icon={faMusic} />} Song</h1>
+            </div>
+            <div className={cx('container-add')}>
+                <Button className={cx('button-add')} onClick={() => handleOpen('add')}>
+                    <PlusOutlined />
+                </Button>
+                <h5 className={cx('title-add')}>Add Song</h5>
+            </div>
+            <div>
+                <Table dataSource={songs} rowKey="songID" pagination={{ pageSize: 5 }}>
+                    <Column title="Song ID" dataIndex="songID" key="songID" align="center" width={70} />
+                    <Column
+                        title="Thumbnail"
+                        dataIndex="imageURL"
+                        key="imageURL"
+                        align="center"
+                        render={(imageURL) => (
+                            <img
+                                src={imageURL}
+                                alt="avatar"
+                                style={{ width: '50px', height: '50px', borderRadius: '50%' }}
                             />
-                            <Column title="Name" dataIndex="name" key="name" align="center" />
-                            <Column title="Artist" dataIndex="artist" key="artist" align="center" />
-                            <Column title="Genre" dataIndex="genre" key="genre" align="center" />
-                            <Column title="Album" dataIndex="album" key="album" align="center" />
-                            <Column title="Views" dataIndex="views" key="views" align="center" />
-                            <Column title="Created At" dataIndex="createdAt" key="createdAt" align="center" />
-                            <Column
-                                title="Download"
-                                dataIndex="songURL"
-                                key="songURL"
-                                align="center"
-                                render={(songURL) => (
-                                    <a className={cx('underline')} href={songURL}>
-                                        Download
-                                    </a>
-                                )}
-                            />
-                            <Column
-                                title="Action"
-                                key="action"
-                                align="center"
-                                render={(_, record) => (
-                                    <Space size="middle">
-                                        <button
-                                            className={cx('edit')}
-                                            onClick={() => handleOpen('update', record.songID)}
-                                        >
-                                            Edit
-                                        </button>
-                                        <button
-                                            className={cx('delete')}
-                                            onClick={() => handleDeleteSong(record.songID)}
-                                        >
-                                            Delete
-                                        </button>
-                                    </Space>
-                                )}
-                            />
-                        </Table>
-                    </div>
-                    {isModalOpen && (
-                        <ModalCustom
-                            type={modalType}
-                            title={modalType === 'add' ? 'Add Song' : 'Update Song'}
-                            isModalOpen={isModalOpen}
-                            handleCancel={handleCancel}
-                            btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
-                            handleSubmit={handleSubmit}
-                            songData={selectedSong}
-                            loading={loading}
-                        />
-                    )}
-                </div>
+                        )}
+                    />
+                    <Column title="Name" dataIndex="name" key="name" align="center" />
+                    <Column title="Artist" dataIndex="artist" key="artist" align="center" />
+                    <Column title="Genre" dataIndex="genre" key="genre" align="center" />
+                    <Column title="Album" dataIndex="album" key="album" align="center" />
+                    <Column title="Views" dataIndex="views" key="views" align="center" />
+                    <Column title="Created At" dataIndex="createdAt" key="createdAt" align="center" />
+                    <Column
+                        title="Download"
+                        dataIndex="songURL"
+                        key="songURL"
+                        align="center"
+                        render={(songURL) => (
+                            <a className={cx('underline')} href={songURL}>
+                                Download
+                            </a>
+                        )}
+                    />
+                    <Column
+                        title="Action"
+                        key="action"
+                        align="center"
+                        render={(_, record) => (
+                            <Space size="middle">
+                                <button className={cx('edit')} onClick={() => handleOpen('update', record.songID)}>
+                                    Edit
+                                </button>
+                                <button className={cx('delete')} onClick={() => handleDeleteSong(record.songID)}>
+                                    Delete
+                                </button>
+                            </Space>
+                        )}
+                    />
+                </Table>
+            </div>
+            {isModalOpen && (
+                <ModalCustom
+                    type={modalType}
+                    title={modalType === 'add' ? 'Add Song' : 'Update Song'}
+                    isModalOpen={isModalOpen}
+                    handleCancel={handleCancel}
+                    btnSubmit={modalType === 'add' ? 'Add' : 'Update'}
+                    handleSubmit={handleSubmit}
+                    songData={selectedSong}
+                    loading={loading}
+                />
             )}
         </div>
     );

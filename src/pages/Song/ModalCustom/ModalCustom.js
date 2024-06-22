@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, Button } from 'antd';
 import Loading from '~/pages/Loading';
+import classNames from 'classnames/bind';
+import styles from './ModalCustom.module.scss';
+
+const cx = classNames.bind(styles);
 
 function ModalCustom({ type, title, isModalOpen, handleCancel, btnSubmit, handleSubmit, songData, loading }) {
     const [form] = Form.useForm();
     const [file, setFile] = useState(null);
-    //const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (songData) {
@@ -24,13 +27,19 @@ function ModalCustom({ type, title, isModalOpen, handleCancel, btnSubmit, handle
 
     const onFinish = (values) => {
         handleSubmit(values, file);
-        //setLoading(true);
     };
 
     return (
         <div>
             {loading ? (
-                <Modal open={isModalOpen} onCancel={handleCancel} footer={null} closable={false} width={70}>
+                <Modal
+                    className={cx('loading')}
+                    open={isModalOpen}
+                    onCancel={handleCancel}
+                    footer={null}
+                    closable={false}
+                    width={70}
+                >
                     <Loading />
                 </Modal>
             ) : (

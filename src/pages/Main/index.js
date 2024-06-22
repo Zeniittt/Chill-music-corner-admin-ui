@@ -105,7 +105,7 @@ function Main({ onLoginSuccess }) {
                         }}
                     >
                         <Button type="primary" htmlType="submit" onClick={handleSubmit}>
-                            Submit
+                            Login
                         </Button>
                     </Form.Item>
                 </Form>
