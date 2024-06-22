@@ -117,7 +117,7 @@ function Song() {
     };
 
     return (
-        <div>
+        <div className={cx('wrapper')}>
             {loading ? (
                 <Modal className={cx('loading')} visible={true} closable={false} footer={false}>
                     <Loading />

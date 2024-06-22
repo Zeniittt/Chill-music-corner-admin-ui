@@ -31,8 +31,12 @@ const genreServices = {
 
     addGenre: async (genreData) => {
         try {
-            console.log(genreData);
-            const response = await axios.post(apiUrl, genreData);
+            const token = localStorage.getItem('token');
+            const response = await axios.post(apiUrl, genreData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(error);
@@ -41,7 +45,12 @@ const genreServices = {
 
     updateGenre: async (genreID, updatedData) => {
         try {
-            const response = await axios.patch(`${apiUrl}/${genreID}`, updatedData);
+            const token = localStorage.getItem('token');
+            const response = await axios.patch(`${apiUrl}/${genreID}`, updatedData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error updating genre:', error);
@@ -51,7 +60,12 @@ const genreServices = {
 
     deleteGenre: async (genreID) => {
         try {
-            const response = await axios.delete(`${apiUrl}/${genreID}`);
+            const token = localStorage.getItem('token');
+            const response = await axios.delete(`${apiUrl}/${genreID}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(error);

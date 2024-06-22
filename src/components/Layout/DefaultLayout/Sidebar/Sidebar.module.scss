@@ -1,6 +1,6 @@
 .sidebar {
-    width: 230px;
-    height: 112vh;
+    min-width: 230px;
+    max-height: 100vh;
     background-image: linear-gradient(to bottom, #ffffff, #b2eef6);
 }
 
