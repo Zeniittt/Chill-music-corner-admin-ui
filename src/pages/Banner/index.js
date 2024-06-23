@@ -79,9 +79,19 @@ function Banner() {
         setLoading(true);
         setIsModalOpen(true);
         try {
-            await bannerServices.deleteBanner(bannerID);
-            message.success('Banner deleted successfully');
-            handleReload();
+            const token = localStorage.getItem('token');
+            if (token) {
+                await bannerServices.deleteBanner(token, bannerID);
+                message.success('Banner deleted successfully');
+                setTimeout(() => {
+                    handleReload();
+                }, 500);
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
+            }
         } catch (error) {
             console.error('Error deleting banner:', error);
         } finally {
@@ -93,26 +103,39 @@ function Banner() {
     const handleSubmit = async (values, file) => {
         setLoading(true);
         setIsModalOpen(true);
+        const token = localStorage.getItem('token');
         try {
-            if (modalType === 'add') {
-                const formData = new FormData();
-                for (const key in values) {
-                    formData.append(key, values[key]);
+            if (token) {
+                try {
+                    if (modalType === 'add') {
+                        const formData = new FormData();
+                        for (const key in values) {
+                            formData.append(key, values[key]);
+                        }
+                        formData.append('imageURL', file);
+                        await bannerServices.addBanner(token, formData);
+                        message.success('Banner added successfully');
+                    } else if (modalType === 'update' && selectedBanner) {
+                        await bannerServices.updateBanner(token, selectedBanner.bannerID, values);
+                        message.success('Banner updated successfully');
+                    }
+                    setTimeout(() => {
+                        handleReload();
+                    }, 500);
+                } catch (error) {
+                    console.error('Error processing request:', error);
+                } finally {
+                    setLoading(false);
+                    setIsModalOpen(false);
                 }
-                formData.append('imageURL', file);
-                await bannerServices.addBanner(formData);
-                console.log(formData);
-                message.success('Banner added successfully');
-            } else if (modalType === 'update' && selectedBanner) {
-                await bannerServices.updateBanner(selectedBanner.bannerID, values);
-                message.success('Banner updated successfully');
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
             }
-            handleReload();
         } catch (error) {
-            console.error('Error processing request:', error);
-        } finally {
-            setLoading(false);
-            setIsModalOpen(false);
+            console.log(error);
         }
     };
 

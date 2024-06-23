@@ -5,12 +5,7 @@ const apiUrl = process.env.REACT_APP_API_URL + '/banners';
 const bannerServices = {
     getAllBanner: async () => {
         try {
-            const token = localStorage.getItem('token');
-            const respone = await axios.get(apiUrl, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const respone = await axios.get(apiUrl);
             const listBanner = respone.data;
             return listBanner;
         } catch (error) {
@@ -28,10 +23,11 @@ const bannerServices = {
         }
     },
 
-    addBanner: async (bannerData) => {
+    addBanner: async (token, bannerData) => {
         try {
             const response = await axios.post(apiUrl, bannerData, {
                 headers: {
+                    Authorization: `Bearer ${token}`,
                     'Content-Type': 'multipart/form-data', // Thiết lập header 'Content-Type' là 'multipart/form-data'
                 },
             });
@@ -41,9 +37,13 @@ const bannerServices = {
         }
     },
 
-    updateBanner: async (bannerID, updatedData) => {
+    updateBanner: async (token, bannerID, updatedData) => {
         try {
-            const response = await axios.patch(`${apiUrl}/${bannerID}`, updatedData);
+            const response = await axios.patch(`${apiUrl}/${bannerID}`, updatedData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error updating banner:', error);
@@ -51,9 +51,13 @@ const bannerServices = {
         }
     },
 
-    deleteBanner: async (bannerID) => {
+    deleteBanner: async (token, bannerID) => {
         try {
-            const response = await axios.delete(`${apiUrl}/${bannerID}`);
+            const response = await axios.delete(`${apiUrl}/${bannerID}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(error);
