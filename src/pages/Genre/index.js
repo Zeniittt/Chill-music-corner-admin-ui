@@ -79,9 +79,19 @@ function Genre() {
         setLoading(true);
         setIsModalOpen(true);
         try {
-            await genreServices.deleteGenre(genreID);
-            message.success('Genre deleted successfully');
-            handleReload();
+            const token = localStorage.getItem('token');
+            if (token) {
+                await genreServices.deleteGenre(token, genreID);
+                message.success('Genre deleted successfully');
+                setTimeout(() => {
+                    handleReload();
+                }, 500);
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
+            }
         } catch (error) {
             console.error('Error deleting genre:', error);
         } finally {
@@ -94,19 +104,33 @@ function Genre() {
         setLoading(true);
         setIsModalOpen(true);
         try {
-            if (modalType === 'add') {
-                const formData = new FormData();
-                for (const key in values) {
-                    formData.append(key, values[key]);
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    if (modalType === 'add') {
+                        const formData = new FormData();
+                        for (const key in values) {
+                            formData.append(key, values[key]);
+                        }
+                        formData.append('imageURL', file);
+                        await genreServices.addGenre(token, formData);
+                        message.success('Genre added successfully');
+                    } else if (modalType === 'update' && selectedGenre) {
+                        await genreServices.updateGenre(token, selectedGenre.genreID, values);
+                        message.success('Genre updated successfully');
+                    }
+                    setTimeout(() => {
+                        handleReload();
+                    }, 500);
+                } catch (error) {
+                    console.log(error);
                 }
-                formData.append('imageURL', file);
-                await genreServices.addGenre(formData);
-                message.success('Genre added successfully');
-            } else if (modalType === 'update' && selectedGenre) {
-                await genreServices.updateGenre(selectedGenre.genreID, values);
-                message.success('Genre updated successfully');
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
             }
-            handleReload();
         } catch (error) {
             console.error('Error processing request:', error);
         } finally {
