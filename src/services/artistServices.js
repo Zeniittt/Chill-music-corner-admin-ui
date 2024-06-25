@@ -29,11 +29,12 @@ const artistServices = {
         }
     },
 
-    addArtist: async (artistData) => {
+    addArtist: async (token, artistData) => {
         try {
             const response = await axios.post(apiUrl, artistData, {
                 headers: {
                     'Content-Type': 'multipart/form-data', // Thiết lập header 'Content-Type' là 'multipart/form-data'
+                    Authorization: `Bearer ${token}`,
                 },
             });
             return response.data;
@@ -42,9 +43,13 @@ const artistServices = {
         }
     },
 
-    updateArtist: async (artistId, updatedData) => {
+    updateArtist: async (token, artistId, updatedData) => {
         try {
-            const response = await axios.patch(`${apiUrl}/${artistId}`, updatedData);
+            const response = await axios.patch(`${apiUrl}/${artistId}`, updatedData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error updating artist:', error);
@@ -52,9 +57,13 @@ const artistServices = {
         }
     },
 
-    deleteArtist: async (artistId) => {
+    deleteArtist: async (token, artistId) => {
         try {
-            const response = await axios.delete(`${apiUrl}/${artistId}`);
+            const response = await axios.delete(`${apiUrl}/${artistId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(error);

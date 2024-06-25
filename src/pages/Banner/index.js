@@ -103,8 +103,8 @@ function Banner() {
     const handleSubmit = async (values, file) => {
         setLoading(true);
         setIsModalOpen(true);
-        const token = localStorage.getItem('token');
         try {
+            const token = localStorage.getItem('token');
             if (token) {
                 try {
                     if (modalType === 'add') {

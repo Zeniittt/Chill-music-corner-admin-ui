@@ -85,9 +85,19 @@ function Artist() {
         setLoading(true);
         setIsModalOpen(true);
         try {
-            await artistServices.deleteArtist(artistId);
-            message.success('Artist deleted successfully');
-            handleReload();
+            const token = localStorage.getItem('token');
+            if (token) {
+                await artistServices.deleteArtist(token, artistId);
+                message.success('Artist deleted successfully');
+                setTimeout(() => {
+                    handleReload();
+                }, 500);
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
+            }
         } catch (error) {
             console.error('Error deleting artist:', error);
         } finally {
@@ -100,19 +110,33 @@ function Artist() {
         setLoading(true);
         setIsModalOpen(true);
         try {
-            if (modalType === 'add') {
-                const formData = new FormData();
-                for (const key in values) {
-                    formData.append(key, values[key]);
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    if (modalType === 'add') {
+                        const formData = new FormData();
+                        for (const key in values) {
+                            formData.append(key, values[key]);
+                        }
+                        formData.append('imageURL', file);
+                        await artistServices.addArtist(token, formData);
+                        message.success('Artist added successfully');
+                    } else if (modalType === 'update' && selectedArtist) {
+                        await artistServices.updateArtist(token, selectedArtist.artistID, values);
+                        message.success('Artist updated successfully');
+                    }
+                    setTimeout(() => {
+                        handleReload();
+                    }, 500);
+                } catch (error) {
+                    console.log(error);
                 }
-                formData.append('imageURL', file);
-                await artistServices.addArtist(formData);
-                message.success('Artist added successfully');
-            } else if (modalType === 'update' && selectedArtist) {
-                await artistServices.updateArtist(selectedArtist.artistID, values);
-                message.success('Artist updated successfully');
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
             }
-            handleReload();
         } catch (error) {
             console.error('Error processing request:', error);
         } finally {

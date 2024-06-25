@@ -79,9 +79,19 @@ function Song() {
         setLoading(true);
         setIsModalOpen(true);
         try {
-            await songServices.deleteSong(songId);
-            message.success('Song deleted successfully');
-            handleReload();
+            const token = localStorage.getItem('token');
+            if (token) {
+                await songServices.deleteSong(token, songId);
+                message.success('Song deleted successfully');
+                setTimeout(() => {
+                    handleReload();
+                }, 500);
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
+            }
         } catch (error) {
             console.error('Error deleting song:', error);
         } finally {
@@ -94,19 +104,33 @@ function Song() {
         setLoading(true);
         setIsModalOpen(true);
         try {
-            if (modalType === 'add') {
-                const formData = new FormData();
-                for (const key in values) {
-                    formData.append(key, values[key]);
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    if (modalType === 'add') {
+                        const formData = new FormData();
+                        for (const key in values) {
+                            formData.append(key, values[key]);
+                        }
+                        formData.append('songFile', file);
+                        await songServices.addSong(token, formData);
+                        message.success('Song added successfully');
+                    } else if (modalType === 'update' && selectedSong) {
+                        await songServices.updateSong(token, selectedSong.songID, values);
+                        message.success('Song updated successfully');
+                    }
+                    setTimeout(() => {
+                        handleReload();
+                    }, 500);
+                } catch (error) {
+                    console.log(error);
                 }
-                formData.append('songFile', file);
-                await songServices.addSong(formData);
-                message.success('Song added successfully');
-            } else if (modalType === 'update' && selectedSong) {
-                await songServices.updateSong(selectedSong.songID, values);
-                message.success('Song updated successfully');
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
             }
-            handleReload();
         } catch (error) {
             console.error('Error processing request:', error);
         } finally {

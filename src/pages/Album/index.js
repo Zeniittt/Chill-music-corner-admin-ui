@@ -83,9 +83,19 @@ function Album() {
         setLoading(true);
         setIsModalOpen(true);
         try {
-            await albumServices.deleteAlbum(albumID);
-            message.success('Album deleted successfully');
-            handleReload();
+            const token = localStorage.getItem('token');
+            if (token) {
+                await albumServices.deleteAlbum(albumID);
+                message.success('Album deleted successfully');
+                setTimeout(() => {
+                    handleReload();
+                }, 500);
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
+            }
         } catch (error) {
             console.error('Error deleting album:', error);
         } finally {
@@ -98,19 +108,33 @@ function Album() {
         setLoading(true);
         setIsModalOpen(true);
         try {
-            if (modalType === 'add') {
-                const formData = new FormData();
-                for (const key in values) {
-                    formData.append(key, values[key]);
+            const token = localStorage.getItem('token');
+            if (token) {
+                try {
+                    if (modalType === 'add') {
+                        const formData = new FormData();
+                        for (const key in values) {
+                            formData.append(key, values[key]);
+                        }
+                        formData.append('imageURL', file);
+                        await albumServices.addAlbum(token, formData);
+                        message.success('Album added successfully');
+                    } else if (modalType === 'update' && selectedAlbum) {
+                        await albumServices.updateAlbum(token, selectedAlbum.albumID, values);
+                        message.success('Album updated successfully');
+                    }
+                    setTimeout(() => {
+                        handleReload();
+                    }, 500);
+                } catch (error) {
+                    console.log(error);
                 }
-                formData.append('imageURL', file);
-                await albumServices.addAlbum(formData);
-                message.success('Album added successfully');
-            } else if (modalType === 'update' && selectedAlbum) {
-                await albumServices.updateAlbum(selectedAlbum.albumID, values);
-                message.success('Album updated successfully');
+            } else {
+                message.error('Access denined. No Token provided.');
+                setTimeout(() => {
+                    handleReload();
+                }, 1000);
             }
-            handleReload();
         } catch (error) {
             console.error('Error processing request:', error);
         } finally {

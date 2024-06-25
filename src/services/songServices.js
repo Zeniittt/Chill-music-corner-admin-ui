@@ -29,11 +29,12 @@ const songServices = {
         }
     },
 
-    addSong: async (songData) => {
+    addSong: async (token, songData) => {
         try {
             const response = await axios.post(apiUrl, songData, {
                 headers: {
                     'Content-Type': 'multipart/form-data', // Thiết lập header 'Content-Type' là 'multipart/form-data'
+                    Authorization: `Bearer ${token}`,
                 },
             });
             return response.data;
@@ -42,9 +43,13 @@ const songServices = {
         }
     },
 
-    updateSong: async (songId, updatedData) => {
+    updateSong: async (token, songId, updatedData) => {
         try {
-            const response = await axios.patch(`${apiUrl}/${songId}`, updatedData);
+            const response = await axios.patch(`${apiUrl}/${songId}`, updatedData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error updating song:', error);
@@ -52,9 +57,13 @@ const songServices = {
         }
     },
 
-    deleteSong: async (songId) => {
+    deleteSong: async (token, songId) => {
         try {
-            const response = await axios.delete(`${apiUrl}/${songId}`);
+            const response = await axios.delete(`${apiUrl}/${songId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(error);

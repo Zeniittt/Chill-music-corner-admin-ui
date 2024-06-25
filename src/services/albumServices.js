@@ -6,12 +6,7 @@ const albumServices = {
     getAllAlbum: async () => {
         try {
             console.log(apiUrl);
-            const token = localStorage.getItem('token');
-            const respone = await axios.get(apiUrl, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const respone = await axios.get(apiUrl);
             const listAlbum = respone.data;
             return listAlbum;
         } catch (error) {
@@ -29,11 +24,12 @@ const albumServices = {
         }
     },
 
-    addAlbum: async (artistData) => {
+    addAlbum: async (token, artistData) => {
         try {
             const response = await axios.post(apiUrl, artistData, {
                 headers: {
                     'Content-Type': 'multipart/form-data', // Thiết lập header 'Content-Type' là 'multipart/form-data'
+                    Authorization: `Bearer ${token}`,
                 },
             });
             return response.data;
@@ -42,9 +38,13 @@ const albumServices = {
         }
     },
 
-    updateAlbum: async (albumID, updatedData) => {
+    updateAlbum: async (token, albumID, updatedData) => {
         try {
-            const response = await axios.patch(`${apiUrl}/${albumID}`, updatedData);
+            const response = await axios.patch(`${apiUrl}/${albumID}`, updatedData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error('Error updating album:', error);
@@ -52,9 +52,13 @@ const albumServices = {
         }
     },
 
-    deleteAlbum: async (albumID) => {
+    deleteAlbum: async (token, albumID) => {
         try {
-            const response = await axios.delete(`${apiUrl}/${albumID}`);
+            const response = await axios.delete(`${apiUrl}/${albumID}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             return response.data;
         } catch (error) {
             console.error(error);
