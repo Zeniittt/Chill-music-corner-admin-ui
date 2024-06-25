@@ -12,6 +12,7 @@
         "@testing-library/user-event": "^13.5.0",
         "antd": "^5.17.0",
         "axios": "^1.6.8",
+        "babel-plugin-module-resolver": "^5.0.2",
         "classnames": "^2.5.1",
         "dotenv": "^16.4.5",
         "normalize.css": "^8.0.1",
@@ -46,7 +47,6 @@
         ]
     },
     "devDependencies": {
-        "babel-plugin-module-resolver": "^5.0.2",
         "customize-cra": "^1.0.0",
         "react-app-rewired": "^2.2.1",
         "sass": "^1.77.0"
